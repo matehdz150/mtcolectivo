@@ -77,3 +77,7 @@ $color-error-400: #f87171;
 $color-error-500: #ef4444; // usado en Modal.scss
 $color-error-600: #dc2626;
 $color-error-700: #b91c1c;
+
+// Aliases para compatibilidad
+$color-danger-600: $color-error-600 !default;
+$color-danger-400: $color-error-400 !default;

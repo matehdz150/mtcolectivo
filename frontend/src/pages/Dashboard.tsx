@@ -5,7 +5,12 @@ import Sidebar from "../components/Sidebar";
 import Modal, { type ModalStatus } from "../components/Modal";
 import PdfPreview from "../components/PdfPreview";
 import { uploadExcel, ApiError } from "../services/api";
-import { deleteOrder, fetchOrders, pdfFromData, type Order } from "../services/orders";
+import {
+  deleteOrder,
+  fetchOrders,
+  pdfFromData,
+  type Order,
+} from "../services/orders";
 import "./Dashboard.scss";
 import { DownloadIcon, EyeIcon, TrashIcon } from "../components/Icons";
 import { useAuth } from "../contexts/AuthContext";
@@ -13,12 +18,13 @@ import { useAuth } from "../contexts/AuthContext";
 type ApiState = "idle" | "loading" | "done" | "error";
 
 const fmtMoney = (n: number | null) =>
-  n === null ? "-" : n.toLocaleString("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 });
-
-const fmtDate = (iso: string) => {
-  try { return new Date(iso).toLocaleDateString("es-MX", { year: "numeric", month: "2-digit", day: "2-digit" }); }
-  catch { return iso; }
-};
+  n === null
+    ? "-"
+    : n.toLocaleString("es-MX", {
+        style: "currency",
+        currency: "MXN",
+        maximumFractionDigits: 0,
+      });
 
 export default function Dashboard() {
   const { isAuth } = useAuth();
@@ -33,7 +39,9 @@ export default function Dashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStatus, setModalStatus] = useState<ModalStatus>("loading");
   const [modalTitle, setModalTitle] = useState("Procesando…");
-  const [modalMsg, setModalMsg] = useState("Estamos generando tu PDF. Esto puede tardar unos segundos.");
+  const [modalMsg, setModalMsg] = useState(
+    "Estamos generando tu PDF. Esto puede tardar unos segundos."
+  );
 
   const [uploadPdfUrl, setUploadPdfUrl] = useState<string | null>(null);
 
@@ -115,14 +123,17 @@ export default function Dashboard() {
       setOrders(data);
     } catch (err) {
       const apiErr = err as ApiError;
-      const msg = apiErr?.status === 401
-        ? "Sesión expirada. Vuelve a iniciar sesión."
-        : (apiErr?.message || "Error al generar PDF");
+      const msg =
+        apiErr?.status === 401
+          ? "Sesión expirada. Vuelve a iniciar sesión."
+          : apiErr?.message || "Error al generar PDF";
 
       setStatus("error");
       setMessage(msg);
       setModalStatus("error");
-      setModalTitle(apiErr?.status === 401 ? "Sesión expirada" : "Ocurrió un problema");
+      setModalTitle(
+        apiErr?.status === 401 ? "Sesión expirada" : "Ocurrió un problema"
+      );
       setModalMsg(msg);
     } finally {
       // 👇 Fuerza remount del input para que el próximo change SIEMPRE dispare
@@ -146,8 +157,16 @@ export default function Dashboard() {
       setModalOpen(false);
     } catch (e: any) {
       setModalStatus("error");
-      setModalTitle(e?.status === 401 ? "Sesión expirada" : "No se pudo abrir la vista previa");
-      setModalMsg(e?.status === 401 ? "Vuelve a iniciar sesión." : (e?.message || "Error desconocido"));
+      setModalTitle(
+        e?.status === 401
+          ? "Sesión expirada"
+          : "No se pudo abrir la vista previa"
+      );
+      setModalMsg(
+        e?.status === 401
+          ? "Vuelve a iniciar sesión."
+          : e?.message || "Error desconocido"
+      );
       setModalOpen(true);
     }
   };
@@ -173,8 +192,14 @@ export default function Dashboard() {
       setTimeout(() => setModalOpen(false), 1000);
     } catch (e: any) {
       setModalStatus("error");
-      setModalTitle(e?.status === 401 ? "Sesión expirada" : "No se pudo descargar");
-      setModalMsg(e?.status === 401 ? "Vuelve a iniciar sesión." : (e?.message || "Error desconocido"));
+      setModalTitle(
+        e?.status === 401 ? "Sesión expirada" : "No se pudo descargar"
+      );
+      setModalMsg(
+        e?.status === 401
+          ? "Vuelve a iniciar sesión."
+          : e?.message || "Error desconocido"
+      );
     }
   };
 
@@ -187,8 +212,14 @@ export default function Dashboard() {
       setOrders((prev) => prev.filter((x) => x.id !== o.id));
     } catch (e: any) {
       setModalStatus("error");
-      setModalTitle(e?.status === 401 ? "Sesión expirada" : "No se pudo eliminar");
-      setModalMsg(e?.status === 401 ? "Vuelve a iniciar sesión." : (e?.message || "Error desconocido"));
+      setModalTitle(
+        e?.status === 401 ? "Sesión expirada" : "No se pudo eliminar"
+      );
+      setModalMsg(
+        e?.status === 401
+          ? "Vuelve a iniciar sesión."
+          : e?.message || "Error desconocido"
+      );
       setModalOpen(true);
     }
   };
@@ -200,6 +231,29 @@ export default function Dashboard() {
     a.href = uploadPdfUrl;
     a.download = "orden.pdf";
     a.click();
+  };
+
+  const fmtDate = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleDateString("es-MX", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+    } catch {
+      return iso;
+    }
+  };
+
+  const fmtTime = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleTimeString("es-MX", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "";
+    }
   };
 
   return (
@@ -225,10 +279,14 @@ export default function Dashboard() {
               onChange={onInputChange}
               aria-label="Seleccionar archivo Excel"
             />
-            <div className="big-icon" aria-hidden>📄</div>
+            <div className="big-icon" aria-hidden>
+              📄
+            </div>
             <h3>Selecciona o arrastra tu Excel</h3>
             <p>Formatos permitidos: .xlsx, .xls</p>
-            <label htmlFor="excel-file" className="btn-primary as-label">Elegir archivo</label>
+            <label htmlFor="excel-file" className="btn-primary as-label">
+              Elegir archivo
+            </label>
           </div>
 
           <div className={`status status--${status}`}>
@@ -237,36 +295,68 @@ export default function Dashboard() {
             {status === "error" && <span>Ups: {message}</span>}
           </div>
         </section>
+        {/* ===== ÓRDENES: Tabla Pro ===== */}
+        <section className="orders-pro">
+  <h3>Órdenes recientes</h3>
 
-        <section className="orders-section">
-          <h3>Órdenes recientes</h3>
-          {loadingOrders && <div className="orders-empty">Cargando…</div>}
-          {!loadingOrders && orders.length === 0 && <div className="orders-empty">Aún no hay órdenes.</div>}
-          <div className="orders-grid">
-            {orders.map((o) => (
-              <article key={o.id} className="order-card">
-                <div className="order-main" onClick={() => openPreview(o)}>
-                  <h4 className="order-name">{o.nombre || "Sin nombre"}</h4>
-                  <div className="order-meta">
-                    <span className="order-total">{fmtMoney(o.total)}</span>
-                    <span className="order-date">{fmtDate(o.created_at)}</span>
-                  </div>
-                </div>
-                <div className="order-actions">
-                  <button className="icon-btn" onClick={() => openPreview(o)} aria-label="Vista previa">
-                    <EyeIcon size="1.25rem" className="icon" />
-                  </button>
-                  <button className="icon-btn" onClick={() => downloadFromOrder(o)} aria-label="Descargar PDF">
-                    <DownloadIcon size="1.25rem" className="icon" />
-                  </button>
-                  <button className="icon-btn danger" onClick={() => removeOrder(o)} aria-label="Eliminar orden">
-                    <TrashIcon size="1.25rem" className="iconD" />
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
+  {/* Encabezado fijo */}
+  <div className="orders-pro__head">
+    <div className="col col--cliente">Cliente</div>
+    <div className="col col--total">Total</div>
+    <div className="col col--fecha">Fecha</div>
+    <div className="col col--hora">Hora</div>
+    <div className="col col--acciones">Acciones</div>
+  </div>
+
+  {/* Área scrolleable */}
+  <div className="orders-pro__body">
+    {loadingOrders && (
+      <div className="orders-pro__empty">Cargando…</div>
+    )}
+    {!loadingOrders && orders.length === 0 && (
+      <div className="orders-pro__empty">Aún no hay órdenes.</div>
+    )}
+
+    {orders.map((o, idx) => (
+      <div
+        key={o.id}
+        className={`orders-pro__row ${idx % 2 ? "is-alt" : ""}`}
+      >
+        <div className="cell cell--cliente" onClick={() => openPreview(o)}>
+          <div className="name">{o.nombre || "Sin nombre"}</div>
+          <div className="sub">#{o.id}</div>
+        </div>
+
+        <div className="cell cell--total">
+          <span className="money">{fmtMoney(o.total)}</span>
+        </div>
+
+        <div className="cell cell--fecha">
+          {fmtDate(o.created_at)}
+        </div>
+
+        <div className="cell cell--hora">
+          {new Date(o.created_at).toLocaleTimeString("es-MX", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </div>
+
+        <div className="cell cell--acciones">
+          <button className="icon-chip" onClick={() => openPreview(o)} aria-label="Vista previa">
+            <EyeIcon size="1.1rem" />
+          </button>
+          <button className="icon-chip" onClick={() => downloadFromOrder(o)} aria-label="Descargar PDF">
+            <DownloadIcon size="1.1rem" />
+          </button>
+          <button className="icon-chip danger" onClick={() => removeOrder(o)} aria-label="Eliminar orden">
+            <TrashIcon size="1.1rem" />
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
       </main>
 
       <Modal
@@ -278,18 +368,41 @@ export default function Dashboard() {
         children={
           modalStatus === "done" && uploadPdfUrl ? (
             <div className="pdf-preview">
-              <iframe className="pdf-embed" src={uploadPdfUrl} title="Vista previa PDF" style={{ width: "100%", height: "100%", border: 0 }} />
+              <iframe
+                className="pdf-embed"
+                src={uploadPdfUrl}
+                title="Vista previa PDF"
+                style={{ width: "100%", height: "100%", border: 0 }}
+              />
             </div>
           ) : undefined
         }
         actions={
           modalStatus === "done" && uploadPdfUrl ? (
             <>
-              <button type="button" className="btn" onClick={handleCloseStateModal}>Cerrar</button>
-              <button type="button" className="btn-primary" onClick={downloadUploadedPdf}>Descargar</button>
+              <button
+                type="button"
+                className="btn"
+                onClick={handleCloseStateModal}
+              >
+                Cerrar
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={downloadUploadedPdf}
+              >
+                Descargar
+              </button>
             </>
           ) : modalStatus !== "loading" ? (
-            <button type="button" className="btn" onClick={handleCloseStateModal}>Cerrar</button>
+            <button
+              type="button"
+              className="btn"
+              onClick={handleCloseStateModal}
+            >
+              Cerrar
+            </button>
           ) : undefined
         }
       />
@@ -307,3 +420,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

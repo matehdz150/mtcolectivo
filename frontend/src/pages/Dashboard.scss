@@ -149,136 +149,149 @@
   }
 }
 
-.orders-section {
-  margin-top: 2rem;
-  max-height: 50vh;          /* o 65vh si prefieres más espacio */
-  overflow-y: auto;
-  padding-right: 0.4rem;     /* deja espacio para el scrollbar */
-  scroll-behavior: smooth;
+/* ===== Tabla Pro de Órdenes ===== */
+/* Asegura que la columna de contenido pueda tener hijos con scroll */
+.content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden; /* evita crear scroll en body por padding de hijos */
+}
 
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-  }
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, 0.35);
-  }
+/* SECTION: Orders Pro (scrolleable) */
+.orders-pro {
+  margin-top: 1.25rem;
+  background: #fff;
+  border: 1px solid $color-border;
+  border-radius: $radius-card;
+  box-shadow: 0 6px 18px rgba(0,0,0,.05);
 
   h3 {
-    margin: 0 0 0.75rem;
+    padding: .9rem 1rem .4rem;
+    margin: 0;
     color: $color-text;
-    font-size: 1.125rem;
+    font-size: 1.05rem;
+    font-weight: 700;
   }
 
-  .orders-empty {
-    padding: 1rem 1.25rem;
+  /* Encabezado pegajoso */
+  &__head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 0;
+    background: #f8fafc;
+    border-top: 1px solid $color-border;
+    border-bottom: 1px solid $color-border;
+    padding: .75rem 1rem;
+    font-weight: 700;
     color: $color-muted;
-    background: $color-surface;
-    border: 1px dashed $color-border;
-    border-radius: $radius-card;
+
+    .col { text-align: left; }
+    .col--acciones { text-align: left; }
   }
 
-  .orders-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
+  /* Cuerpo con scroll: ocupa el espacio disponible */
+  &__body {
+  max-height: 41vh;        /* ajusta 56vh al gusto (p.ej. 48vh, 60vh) */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  /* (Opcional) scrollbars bonitas */
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,.15);
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,.28); }
+}
+
+  &__empty {
+    padding: 1.25rem;
+    color: $color-muted;
   }
 
-  .order-card {
+  /* Filas tipo “tabla” */
+  &__row {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 0;
     align-items: center;
-    background: $color-card;
-    border: 1px solid $color-border;
-    border-radius: $radius-card;
-    padding: 0.9rem 1rem;
-    box-shadow: $shadow-sm;
+    padding: .9rem 1rem;
+    border-bottom: 1px solid $color-border;
 
-    &:hover {
-      box-shadow: $shadow-md;
-    }
+    &:hover { background: #f9fafb; }
+    &.is-alt { background: #fbfefb; } /* ligera alternancia */
 
-    .order-main {
-      display: grid;
-      gap: 0.2rem;
-      cursor: pointer;
-    }
-
-    .order-name {
-      margin: 0;
-      font-weight: 700;
-      color: $color-text;
-    }
-
-    .order-meta {
+    .cell {
       display: flex;
-      gap: 0.8rem;
-      align-items: baseline;
-      color: $color-muted;
-      .order-total {
-        color: $color-brand-700;
-        font-weight: 700;
-      }
-      .order-date {
-        font-size: 0.95rem;
-      }
-    }
-
-    .order-actions {
-      display: flex;
-      gap: 1rem;
       align-items: center;
+      gap: .5rem;
+      min-width: 0; /* evita overflow de textos largos */
+    }
 
-      .icon-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0.4rem;
-        border-radius: 0.6rem;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .cell--cliente {
+      cursor: pointer;
+      flex-direction: column;
+      align-items: flex-start;
 
-        .icon {
-          width: 1.5rem;
-          height: 1.5rem;
-          color: $color-brand-500;
-        }
+      .name {
+        color: $color-text;
+        font-weight: 700;
+        line-height: 1.15;
+      }
+      .sub {
+        color: $color-muted;
+        font-size: .82rem;
+        margin-top: .15rem;
+      }
+    }
 
+    .cell--total .money {
+      color: $color-brand-700;
+      font-weight: 800;
+    }
+
+    .cell--acciones {
+      gap: .6rem;
+
+      .icon-chip {
+        display: inline-grid;
+        place-items: center;
+        width: 2rem; height: 2rem;
+        border-radius: .6rem;
+        border: 1px solid $color-border;
+        background: #fff;
+        transition: transform .06s ease, background .2s, border-color .2s;
+
+        svg { display: block; color: $color-brand-600; }
         &:hover {
-          background-color: rgba($color-brand-500, 0.1);
+          background: rgba($color-brand-600,.08);
+          border-color: $color-brand-500;
           transform: translateY(-1px);
-
-          .icon {
-            color: darken($color-brand-500, 10%);
-          }
-
-          .iconD {
-            color: $color-error-600;
-          }
         }
 
         &.danger {
-          border-color: rgba($color-error-400, 0.4);
-
+          border-color: rgba($color-error-500,.35);
+          svg { color: $color-error-600; }
           &:hover {
-            background: rgba($color-error-600, 0.08);
+            background: rgba($color-error-600,.08);
             border-color: $color-error-600;
           }
-        }
-
-        &:active {
-          transform: scale(0.96);
         }
       }
     }
   }
 }
 
+/* Opcional: en pantallas pequeñas, que el scroll tenga un poco más de alto */
+@media (max-width: 900px) {
+  .orders-pro__body {
+    max-height: calc(100vh - 18rem);
+  }
+}
 .drop-card {
   position: relative;
 }
