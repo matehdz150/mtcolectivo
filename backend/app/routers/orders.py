@@ -42,14 +42,14 @@ def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
         dir_destino=payload.get("destino"),
         hor_ida=payload.get("hora_salida"),
         hor_regreso=payload.get("hora_regreso"),
-        duracion=None,
-        capacidadu=None,
-        subtotal=None,
-        descuento=None,
-        total=None,
-        abonado=None,
-        fecha_abono=None,
-        liquidar=None,
+        duracion=0.0,
+        capacidadu=0.0,
+        subtotal=0.0,
+        descuento=0.0,
+        total=0.0,
+        abonado=0.0,
+        fecha_abono=0.0,
+        liquidar=0.0,
     )
 
     db.add(order)
