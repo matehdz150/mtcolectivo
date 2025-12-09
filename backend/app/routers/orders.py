@@ -125,31 +125,22 @@ CANTARITOS_PRICES = {
 
 
 def determine_cantaritos_price(capacidad: int, hora_salida: str) -> float:
-    """
-    Devuelve el precio correcto según hora y capacidad.
-    """
-
-    # Convertir hora “3:22:00 a.m.” → datetime
     t = parse_time(hora_salida)
     hour = t.hour
 
-    # Determinar horario
+    # Determinar horario real
     if 9 <= hour < 12:
         period = "morning"
-    elif 13 <= hour < 16:
+    elif 13 <= hour < 20:
         period = "afternoon"
     else:
-        # Si cae fuera, aplicar morning por default
-        period = "morning"
+        period = "morning"  # fallback
 
     price_info = CANTARITOS_PRICES.get(period, {}).get(capacidad)
-
-    if price_info is None:
-        # No hay precio para esta capacidad → 0
+    if not price_info:
         return 0.0
-    
-    # ¿Dejamos precio con descuento por default?
-    return price_info["desc"]   # <<< usar precio recomendado
+
+    return price_info["normal"]   # <<<<<<  🔥 ahora precio normal
 
 
 @public_router.post("/form-submit", include_in_schema=False)
