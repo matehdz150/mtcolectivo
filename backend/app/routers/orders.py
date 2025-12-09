@@ -65,11 +65,13 @@ CANTARITOS_PRICES = {
         6:  {"normal": 2500, "desc": 2250},
         14: {"normal": 5000, "desc": 4500},
         20: {"normal": 6000, "desc": 5500},
+        45: {"normal": 9500, "desc": 9000},
     },
     "afternoon": {  # 1pm – 8pm
         6:  {"normal": 3000, "desc": 2500},
         14: {"normal": 5500, "desc": 5000},
         20: {"normal": 6500, "desc": 6000},
+        45: {"normal": 10000, "desc": 9500},
     }
 }
 
