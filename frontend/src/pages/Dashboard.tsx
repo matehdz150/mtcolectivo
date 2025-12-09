@@ -370,6 +370,13 @@ export default function Dashboard() {
                   </button>
                   <button
                     className="icon-chip"
+                    onClick={() => openEditor(o)}
+                    aria-label="Editar orden"
+                  >
+                    <EyeIcon size="1.1rem" />
+                  </button>
+                  <button
+                    className="icon-chip"
                     onClick={() => downloadFromOrder(o)}
                     aria-label="Descargar PDF"
                   >
@@ -381,13 +388,6 @@ export default function Dashboard() {
                     aria-label="Eliminar orden"
                   >
                     <TrashIcon size="1.1rem" />
-                  </button>
-                  <button
-                    className="icon-chip"
-                    onClick={() => openEditor(o)}
-                    aria-label="Editar orden"
-                  >
-                    <p>edit</p>
                   </button>
                 </div>
               </div>
