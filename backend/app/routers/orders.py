@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, Depends, HTTPException, Response, Request
 from sqlalchemy.orm import Session
 from datetime import timezone
@@ -46,12 +47,59 @@ def assign_capacidad(pasajeros: int) -> int:
     else:
         return 45
 
-def parse_time(t: str) -> datetime:
+def parse_time(value: str) -> datetime:
     """
-    Convierte '3:22:00 a.m.' → datetime
+    Parser ultra tolerante:
+    - Soporta 12h y 24h
+    - Limpia 'a.m.', 'am', 'AM', 'p.m.', 'pm'
+    - Soporta casos inválidos como '17:33:00 am'
+      → interpreta como 24h ignorando el sufijo
     """
-    t = t.replace("a.m.", "AM").replace("p.m.", "PM")
-    return datetime.strptime(t.strip(), "%I:%M:%S %p")
+
+    if not value:
+        raise ValueError("Hora vacía")
+
+    raw = value.strip().lower()
+    raw = raw.replace("a.m.", "am").replace("p.m.", "pm").replace(".", "").strip()
+
+    # Detecta si el usuario intentó usar AM/PM
+    has_ampm = ("am" in raw) or ("pm" in raw)
+
+    # Extraemos solo los números de la hora
+    time_numbers = re.findall(r"\d+", raw)
+
+    # Si el prefijo numérico es mayor que 12, NO puede ser 12h → 24h forzado
+    try:
+        hour = int(time_numbers[0])
+        if hour > 12 and has_ampm:
+            # limpiamos am/pm y tratamos como 24h
+            raw_24 = re.sub(r"(am|pm)", "", raw).strip()
+            formats_24 = ["%H:%M:%S", "%H:%M"]
+            for fmt in formats_24:
+                try:
+                    return datetime.strptime(raw_24, fmt)
+                except:
+                    pass
+    except:
+        pass
+
+    # ------- Intento normal 12h -------
+    if has_ampm:
+        raw2 = re.sub(r"(am|pm)$", r" \1", raw.replace(" ", ""))  # agrega espacio si falta
+        for fmt in ["%I:%M:%S %p", "%I:%M %p", "%I %p"]:
+            try:
+                return datetime.strptime(raw2.upper(), fmt)
+            except:
+                pass
+
+    # ------- Intento 24h -------
+    for fmt in ["%H:%M:%S", "%H:%M"]:
+        try:
+            return datetime.strptime(raw, fmt)
+        except:
+            pass
+
+    raise ValueError(f"Formato de hora no reconocido: '{value}'")
 
 def is_cantaritos(destino: str) -> bool:
     destino = destino.lower()
