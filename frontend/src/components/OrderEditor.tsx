@@ -2,6 +2,7 @@ import { useState } from "react";
 import { authFetch, API_BASE } from "../services/api";
 
 export default function OrderEditor({ open, order, onClose, onSaved }) {
+    if (!order) return null;
   const [form, setForm] = useState(order);
 
   if (!open) return null;

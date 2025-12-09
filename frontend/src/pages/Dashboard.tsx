@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Modal, { type ModalStatus } from "../components/Modal";
 import PdfPreview from "../components/PdfPreview";
-import { uploadExcel, ApiError } from "../services/api";
+import { uploadExcel, ApiError, authFetch, API_BASE } from "../services/api";
 import OrderEditor from "../components/OrderEditor";
 import {
   deleteOrder,
@@ -15,7 +15,6 @@ import {
 import "./Dashboard.scss";
 import { DownloadIcon, EyeIcon, TrashIcon } from "../components/Icons";
 import { useAuth } from "../contexts/AuthContext";
-
 
 type ApiState = "idle" | "loading" | "done" | "error";
 
@@ -67,6 +66,23 @@ export default function Dashboard() {
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(undefined);
+
+  async function loadOrders() {
+    try {
+      setLoadingOrders(true);
+      const res = await authFetch(`${API_BASE}/orders`);
+      const data = await res.json();
+      setOrders(data);
+    } catch (err) {
+      console.error("Error cargando órdenes:", err);
+    } finally {
+      setLoadingOrders(false);
+    }
+  }
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
 
   const openPicker = () => {
     if (!isAuth) {
@@ -397,6 +413,15 @@ export default function Dashboard() {
         </section>
       </main>
 
+      {editorOpen && editingOrder && (
+        <OrderEditor
+          open={editorOpen}
+          order={editingOrder}
+          onClose={() => setEditorOpen(false)}
+          onSaved={loadOrders} // 👈 seguro querías loadOrders, no loadingOrders
+        />
+      )}
+
       <Modal
         open={modalOpen}
         status={modalStatus}
@@ -454,12 +479,6 @@ export default function Dashboard() {
           setPreviewUrl(undefined);
           setPreviewOpen(false);
         }}
-      />
-      <OrderEditor
-        open={editorOpen}
-        order={editingOrder}
-        onClose={() => setEditorOpen(false)}
-        onSaved={loadingOrders}
       />
     </div>
   );
