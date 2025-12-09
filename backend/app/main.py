@@ -35,6 +35,7 @@ def on_startup():
             "abonado": "REAL",
             "fecha_abono": "TEXT",
             "liquidar": "REAL",
+            "created_at": "TEXT"
         }
 
         for col_name, col_type in needed_cols.items():
