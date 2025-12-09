@@ -1,5 +1,5 @@
 // src/services/api.ts
-export const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+export const API_BASE = import.meta.env.VITE_API_URL ?? "https://vigilant-elegance-production-8c9c.up.railway.app";
 
 export class ApiError extends Error {
   status?: number;
