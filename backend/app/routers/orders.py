@@ -54,7 +54,7 @@ def parse_time(t: str) -> datetime:
     return datetime.strptime(t.strip(), "%I:%M:%S %p")
 
 
-@router.post("/form-submit", include_in_schema=False)
+@public_router.post("/form-submit", include_in_schema=False)
 def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
     # --- Seguridad con API KEY ---
     api_key = request.headers.get("x-api-key")
