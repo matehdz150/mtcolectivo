@@ -27,14 +27,64 @@ def get_db():
     finally:
         db.close()
 
-@public_router.post("/form-submit", include_in_schema=False)
+from datetime import datetime, timedelta
+
+PRICE_TABLE = {
+    6: 2500.00,
+    14: 4500.00,
+    20: 5500.00,
+    45: 9500.00,
+}
+
+def assign_capacidad(pasajeros: int) -> int:
+    if pasajeros <= 6:
+        return 6
+    elif pasajeros <= 14:
+        return 14
+    elif pasajeros <= 20:
+        return 20
+    else:
+        return 45
+
+def parse_time(t: str) -> datetime:
+    """
+    Convierte '3:22:00 a.m.' → datetime
+    """
+    t = t.replace("a.m.", "AM").replace("p.m.", "PM")
+    return datetime.strptime(t.strip(), "%I:%M:%S %p")
+
+
+@router.post("/form-submit", include_in_schema=False)
 def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
-    # Seguridad: validar API KEY
+    # --- Seguridad con API KEY ---
     api_key = request.headers.get("x-api-key")
     if api_key != FORM_API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API key")
 
-    # Crear Order
+    # --- Lectura de datos del formulario ---
+    pasajeros_str = payload.get("personas", "0")
+    pasajeros = int(pasajeros_str)
+
+    hora_ida_raw = payload.get("hora_salida")
+    hora_reg_raw = payload.get("hora_regreso")
+
+    # --- Duration ---
+    try:
+        t1 = parse_time(hora_ida_raw)
+        t2 = parse_time(hora_reg_raw)
+        duracion = (t2 - t1).total_seconds() / 3600  # horas
+        if duracion < 0:
+            duracion += 24  # viaje cruza medianoche
+    except:
+        duracion = 0.0
+
+    # --- Capacidad asignada ---
+    capacidadu = assign_capacidad(pasajeros)
+
+    # --- Precio total según capacidad ---
+    total = PRICE_TABLE.get(capacidadu, 0.0)
+
+    # --- Crear orden ---
     order = Order(
         nombre=payload.get("nombre"),
         fecha=payload.get("fecha"),
@@ -42,21 +92,29 @@ def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
         dir_destino=payload.get("destino"),
         hor_ida=payload.get("hora_salida"),
         hor_regreso=payload.get("hora_regreso"),
-        duracion=0.0,
-        capacidadu=0.0,
-        subtotal=0.0,
+
+        duracion=duracion,
+        capacidadu=capacidadu,
+
+        subtotal=total,
         descuento=0.0,
-        total=0.0,
+        total=total,           # Precio asignado
         abonado=0.0,
-        fecha_abono=0.0,
-        liquidar=0.0,
+        fecha_abono=None,
+        liquidar=total,
     )
 
     db.add(order)
     db.commit()
     db.refresh(order)
 
-    return {"status": "ok", "order_id": order.id}
+    return {
+        "status": "ok",
+        "order_id": order.id,
+        "capacidad_asignada": capacidadu,
+        "duracion_horas": duracion,
+        "precio_total": total
+    }
 
 
 # ================================
