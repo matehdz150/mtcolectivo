@@ -304,3 +304,36 @@
   pointer-events: auto;
   cursor: pointer;
 }
+
+.orders-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: 1rem;
+  margin-bottom: .75rem;
+
+  input,
+  select {
+    padding: .45rem .6rem;
+    border-radius: .55rem;
+    border: 1px solid $color-border;
+    font-size: .85rem;
+    background: #fff;
+    color: $color-text;
+    min-width: 8rem;
+
+    &:focus {
+      outline: none;
+      border-color: $color-brand-500;
+      box-shadow: 0 0 0 2px rgba($color-brand-500, .15);
+    }
+  }
+
+  .btn-sort {
+    @include btn-primary(.45rem, .9rem);
+    font-size: .8rem;
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+  }
+}

@@ -289,6 +289,71 @@ export default function Dashboard() {
       return "";
     }
   };
+  //filtrado
+  type SortField = "fecha" | "nombre" | "total";
+  type SortDir = "asc" | "desc";
+
+  const [filters, setFilters] = useState({
+    name: "",
+    dateFrom: "",
+    dateTo: "",
+    minTotal: "",
+    maxTotal: "",
+    sortField: "fecha" as SortField,
+    sortDir: "desc" as SortDir,
+  });
+  //filtrado
+
+  const filteredOrders = orders
+    .filter((o) => {
+      // Nombre
+      if (
+        filters.name &&
+        !o.nombre?.toLowerCase().includes(filters.name.toLowerCase())
+      ) {
+        return false;
+      }
+
+      // Precio mínimo
+      if (filters.minTotal && o.total !== null) {
+        if (o.total < Number(filters.minTotal)) return false;
+      }
+
+      // Precio máximo
+      if (filters.maxTotal && o.total !== null) {
+        if (o.total > Number(filters.maxTotal)) return false;
+      }
+
+      // Fecha desde
+      if (filters.dateFrom) {
+        if (new Date(o.created_at) < new Date(filters.dateFrom)) return false;
+      }
+
+      // Fecha hasta
+      if (filters.dateTo) {
+        if (new Date(o.created_at) > new Date(filters.dateTo)) return false;
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      let result = 0;
+
+      if (filters.sortField === "fecha") {
+        result =
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      }
+
+      if (filters.sortField === "nombre") {
+        result = (a.nombre || "").localeCompare(b.nombre || "");
+      }
+
+      if (filters.sortField === "total") {
+        result = (a.total || 0) - (b.total || 0);
+      }
+
+      return filters.sortDir === "asc" ? result : -result;
+    });
 
   return (
     <div className="dashboard">
@@ -299,36 +364,74 @@ export default function Dashboard() {
           <h2>Generador de Órdenes</h2>
           <p>Sube tu archivo Excel o revisa las órdenes existentes.</p>
         </header>
+    
+        <section className="orders-filters">
+          <input
+            type="text"
+            placeholder="Buscar cliente…"
+            value={filters.name}
+            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+          />
 
-        <section className="uploader">
-          <div className="drop-card">
-            {/* 👇 clave para remount */}
-            <input
-              key={inputKey}
-              id="excel-file"
-              ref={fileRef}
-              type="file"
-              accept=".xlsx,.xls"
-              className="file-input-overlay"
-              onChange={onInputChange}
-              aria-label="Seleccionar archivo Excel"
-            />
-            <div className="big-icon" aria-hidden>
-              📄
-            </div>
-            <h3>Selecciona o arrastra tu Excel</h3>
-            <p>Formatos permitidos: .xlsx, .xls</p>
-            <label htmlFor="excel-file" className="btn-primary as-label">
-              Elegir archivo
-            </label>
-          </div>
+          <input
+            type="date"
+            value={filters.dateFrom}
+            onChange={(e) =>
+              setFilters({ ...filters, dateFrom: e.target.value })
+            }
+          />
 
-          <div className={`status status--${status}`}>
-            {status === "loading" && <span>Procesando…</span>}
-            {status === "done" && <span>¡Listo! {message}</span>}
-            {status === "error" && <span>Ups: {message}</span>}
-          </div>
+          <input
+            type="date"
+            value={filters.dateTo}
+            onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+          />
+
+          <input
+            type="number"
+            placeholder="Min $"
+            value={filters.minTotal}
+            onChange={(e) =>
+              setFilters({ ...filters, minTotal: e.target.value })
+            }
+          />
+
+          <input
+            type="number"
+            placeholder="Max $"
+            value={filters.maxTotal}
+            onChange={(e) =>
+              setFilters({ ...filters, maxTotal: e.target.value })
+            }
+          />
+
+          <select
+            value={filters.sortField}
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                sortField: e.target.value as SortField,
+              })
+            }
+          >
+            <option value="fecha">Fecha</option>
+            <option value="nombre">Nombre</option>
+            <option value="total">Precio</option>
+          </select>
+
+          <button
+            className="btn-sort"
+            onClick={() =>
+              setFilters({
+                ...filters,
+                sortDir: filters.sortDir === "asc" ? "desc" : "asc",
+              })
+            }
+          >
+            {filters.sortDir === "asc" ? "↑ Asc" : "↓ Desc"}
+          </button>
         </section>
+
         {/* ===== ÓRDENES: Tabla Pro ===== */}
         <section className="orders-pro">
           <h3>Órdenes recientes</h3>
@@ -351,25 +454,36 @@ export default function Dashboard() {
               <div className="orders-pro__empty">Aún no hay órdenes.</div>
             )}
 
-            {orders.map((o, idx) => (
+                    {filteredOrders.map((o, idx) => (
+        
               <div
-                key={o.id}
-                className={`orders-pro__row ${idx % 2 ? "is-alt" : ""}`}
-              >
-                <div
+                        key={o.id}
+                        className={`orders-pro__row ${idx % 2 ? "is-alt" : ""}`}
+                      >
+                        <div
+                 
                   className="cell cell--cliente"
+                 
                   onClick={() => openPreview(o)}
+                
                 >
-                  <div className="name">{o.nombre || "Sin nombre"}</div>
-                  <div className="sub">#{o.id}</div>
-                </div>
+                          <div className="name">{o.nombre || "Sin nombre"}</div>
+                          <div className="sub">#{o.id}</div>
+                        </div>
 
                 <div className="cell cell--total">
                   <span className="money">{fmtMoney(o.total)}</span>
                 </div>
 
                 <div className="cell cell--fecha">{fmtDate(o.created_at)}</div>
+                <div className="cell cell--fecha">{fmtDate(o.created_at)}</div>
 
+                <div className="cell cell--hora">
+                  {new Date(o.created_at).toLocaleTimeString("es-MX", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
                 <div className="cell cell--hora">
                   {new Date(o.created_at).toLocaleTimeString("es-MX", {
                     hour: "2-digit",
@@ -382,13 +496,6 @@ export default function Dashboard() {
                     className="icon-chip"
                     onClick={() => openPreview(o)}
                     aria-label="Vista previa"
-                  >
-                    <EyeIcon size="1.1rem" />
-                  </button>
-                  <button
-                    className="icon-chip"
-                    onClick={() => openEditor(o)}
-                    aria-label="Editar orden"
                   >
                     <EyeIcon size="1.1rem" />
                   </button>
