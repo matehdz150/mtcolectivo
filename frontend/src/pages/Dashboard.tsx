@@ -364,7 +364,7 @@ export default function Dashboard() {
           <h2>Generador de Órdenes</h2>
           <p>Sube tu archivo Excel o revisa las órdenes existentes.</p>
         </header>
-    
+
         <section className="orders-filters">
           <input
             type="text"
@@ -454,22 +454,18 @@ export default function Dashboard() {
               <div className="orders-pro__empty">Aún no hay órdenes.</div>
             )}
 
-                    {filteredOrders.map((o, idx) => (
-        
+            {filteredOrders.map((o, idx) => (
               <div
-                        key={o.id}
-                        className={`orders-pro__row ${idx % 2 ? "is-alt" : ""}`}
-                      >
-                        <div
-                 
+                key={o.id}
+                className={`orders-pro__row ${idx % 2 ? "is-alt" : ""}`}
+              >
+                <div
                   className="cell cell--cliente"
-                 
                   onClick={() => openPreview(o)}
-                
                 >
-                          <div className="name">{o.nombre || "Sin nombre"}</div>
-                          <div className="sub">#{o.id}</div>
-                        </div>
+                  <div className="name">{o.nombre || "Sin nombre"}</div>
+                  <div className="sub">#{o.id}</div>
+                </div>
 
                 <div className="cell cell--total">
                   <span className="money">{fmtMoney(o.total)}</span>
