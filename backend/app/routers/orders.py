@@ -145,6 +145,7 @@ def determine_cantaritos_price(capacidad: int, hora_salida: str) -> float:
 
 @public_router.post("/form-submit", include_in_schema=False)
 def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
+    print(payload)
     # --- Seguridad con API KEY ---
     api_key = request.headers.get("x-api-key")
     if api_key != FORM_API_KEY:
@@ -203,6 +204,7 @@ def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
 
     return {
         "status": "ok",
+        "hora ida": hora_ida_raw,
         "order_id": order.id,
         "capacidad_asignada": capacidadu,
         "duracion_horas": duracion,
