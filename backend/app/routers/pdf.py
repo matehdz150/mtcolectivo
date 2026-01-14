@@ -1,5 +1,4 @@
 # app/routers/pdf.py
-from datetime import datetime
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
 from fastapi.responses import StreamingResponse, PlainTextResponse
 from sqlalchemy.orm import Session
@@ -129,41 +128,6 @@ async def pdf_from_excel(
 # Si te pasan subtotal/desc/abonado, recalculamos total y liquidar.
 # ─────────────────────────────────────────────────────────────────────────────
 
-def normalize_time_str(value: str) -> str:
-    """
-    Convierte cosas como:
-    - '6:00:00 a.m.'
-    - '06:00 AM'
-    - '6:00 am'
-    a un texto fijo: '06:00 AM'
-    """
-    if not value:
-        return ""
-
-    v = value.strip().lower()
-
-    # normaliza am/pm
-    v = v.replace("a.m.", "am").replace("p.m.", "pm")
-
-    # intenta parsear 12h
-    for fmt in ("%I:%M:%S %p", "%I:%M %p"):
-        try:
-            dt = datetime.strptime(v, fmt)
-            return dt.strftime("%I:%M %p")  # TEXTO FINAL
-        except ValueError:
-            pass
-
-    # intenta 24h
-    for fmt in ("%H:%M:%S", "%H:%M"):
-        try:
-            dt = datetime.strptime(v, fmt)
-            return dt.strftime("%H:%M")
-        except ValueError:
-            pass
-
-    # fallback: texto plano
-    return value
-
 
 @router.post("/from-data")
 async def pdf_from_data(
@@ -189,9 +153,6 @@ async def pdf_from_data(
         abonado   = parse_num(s_abonado)
         total     = subtotal - descuento
         liquidar  = total - abonado
-
-        hora_ida = normalize_time_str(g(data, "hor_ida"))
-        hora_regreso = normalize_time_str(g(data, "hor_regreso"))
         
 
         mapping = {
@@ -199,8 +160,8 @@ async def pdf_from_data(
             "&FECHA&": g(data, "fecha"),
             "&DIR_SALIDA&": g(data, "dir_salida"),
             "&DIR_DESTINO&": g(data, "dir_destino"),
-            "&HOR_IDA&": hora_ida,
-            "&HOR_REGRESO&": hora_regreso,
+            "&HOR_IDA&": g(data, "hor_ida"),
+            "&HOR_REGRESO&": g(data, "hor_regreso"),
             "&DURACION&": g(data, "duracion"),
             "&CAPACIDADU&": g(data, "capacidadu"),
 
