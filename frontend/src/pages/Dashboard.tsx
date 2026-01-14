@@ -73,7 +73,7 @@ export default function Dashboard() {
       const res = await authFetch(`${API_BASE}/orders`);
       const data = await res.json();
       setOrders(data);
-      console.log(data)
+      console.log(data);
     } catch (err) {
       console.error("Error cargando órdenes:", err);
     } finally {
@@ -302,11 +302,17 @@ export default function Dashboard() {
     maxTotal: "",
     sortField: "fecha" as SortField,
     sortDir: "desc" as SortDir,
+    minCapacidad: "",
+    maxCapacidad: "",
   });
   //filtrado
 
   const filteredOrders = orders
     .filter((o) => {
+      const total = Number(o.total ?? 0);
+      const capacidad = Number(o.capacidadu ?? 0);
+      const createdAt = new Date(o.created_at);
+
       // Nombre
       if (
         filters.name &&
@@ -315,24 +321,34 @@ export default function Dashboard() {
         return false;
       }
 
-      // Precio mínimo
-      if (filters.minTotal && o.total !== null) {
-        if (o.total < Number(filters.minTotal)) return false;
+      // Total mínimo
+      if (filters.minTotal && total < Number(filters.minTotal)) {
+        return false;
       }
 
-      // Precio máximo
-      if (filters.maxTotal && o.total !== null) {
-        if (o.total > Number(filters.maxTotal)) return false;
+      // Total máximo
+      if (filters.maxTotal && total > Number(filters.maxTotal)) {
+        return false;
+      }
+
+      // Capacidad mínima (pasajeros)
+      if (filters.minCapacidad && capacidad < Number(filters.minCapacidad)) {
+        return false;
+      }
+
+      // Capacidad máxima (pasajeros)
+      if (filters.maxCapacidad && capacidad > Number(filters.maxCapacidad)) {
+        return false;
       }
 
       // Fecha desde
       if (filters.dateFrom) {
-        if (new Date(o.created_at) < new Date(filters.dateFrom)) return false;
+        if (createdAt < new Date(filters.dateFrom)) return false;
       }
 
       // Fecha hasta
       if (filters.dateTo) {
-        if (new Date(o.created_at) > new Date(filters.dateTo)) return false;
+        if (createdAt > new Date(filters.dateTo)) return false;
       }
 
       return true;
@@ -350,7 +366,7 @@ export default function Dashboard() {
       }
 
       if (filters.sortField === "total") {
-        result = (a.total || 0) - (b.total || 0);
+        result = Number(a.total ?? 0) - Number(b.total ?? 0);
       }
 
       return filters.sortDir === "asc" ? result : -result;
@@ -403,6 +419,24 @@ export default function Dashboard() {
             value={filters.maxTotal}
             onChange={(e) =>
               setFilters({ ...filters, maxTotal: e.target.value })
+            }
+          />
+
+          <input
+            type="number"
+            placeholder="Min pasajeros"
+            value={filters.minCapacidad}
+            onChange={(e) =>
+              setFilters({ ...filters, minCapacidad: e.target.value })
+            }
+          />
+
+          <input
+            type="number"
+            placeholder="Max pasajeros"
+            value={filters.maxCapacidad}
+            onChange={(e) =>
+              setFilters({ ...filters, maxCapacidad: e.target.value })
             }
           />
 
