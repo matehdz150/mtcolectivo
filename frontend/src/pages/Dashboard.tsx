@@ -73,6 +73,7 @@ export default function Dashboard() {
       const res = await authFetch(`${API_BASE}/orders`);
       const data = await res.json();
       setOrders(data);
+      console.log(data)
     } catch (err) {
       console.error("Error cargando órdenes:", err);
     } finally {
