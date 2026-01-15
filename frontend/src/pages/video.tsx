@@ -8,6 +8,9 @@ export default function SrtVideoPlayer() {
   const [subsUrl, setSubsUrl] = useState("");
   const [offset, setOffset] = useState<number>(0);
 
+  // 👇 NUEVO: posición horizontal de subtítulos (0 - 100)
+  const [subtitlePosition, setSubtitlePosition] = useState<number>(50);
+
   const [status, setStatus] = useState<string>("");
   const [originalSrtText, setOriginalSrtText] = useState<string>("");
 
@@ -72,12 +75,40 @@ export default function SrtVideoPlayer() {
     [shiftVttTime]
   );
 
+  // ✅ NUEVO: aplicar posición horizontal (position + align)
+  const applyHorizontalPositionToVtt = useCallback(
+    (vttText: string, positionPercent: number) => {
+      const pos = Math.max(0, Math.min(100, positionPercent));
+
+      // Reemplaza cada línea de timestamps y le agrega settings
+      // Ej: 00:00:01.000 --> 00:00:03.000  line:90% position:50% align:middle
+      return vttText.replace(
+        /(\d{2}:\d{2}:\d{2}\.\d{3})\s-->\s(\d{2}:\d{2}:\d{2}\.\d{3})(.*)$/gm,
+        (_match, start, end) => {
+          return `${start} --> ${end} line:90% position:${pos}% align:middle`;
+        }
+      );
+    },
+    []
+  );
+
   async function loadSrtFromUrl(url: string) {
     setStatus("⏳ Descargando SRT...");
     const res = await fetch(url);
     if (!res.ok) throw new Error("No se pudo descargar el SRT");
     return await res.text();
   }
+
+  // 🔥 Genera VTT final con TODO: offset + position
+  const buildFinalVtt = useCallback(
+    (srtText: string, offsetSeconds: number, posPercent: number) => {
+      const baseVtt = srtToVtt(srtText);
+      const shifted = applyOffsetToVtt(baseVtt, offsetSeconds);
+      const positioned = applyHorizontalPositionToVtt(shifted, posPercent);
+      return positioned;
+    },
+    [applyHorizontalPositionToVtt, applyOffsetToVtt, srtToVtt]
+  );
 
   const handleLoad = useCallback(async () => {
     if (!videoUrl.trim()) {
@@ -102,15 +133,15 @@ export default function SrtVideoPlayer() {
       const srt = await loadSrtFromUrl(subsUrl.trim());
       setOriginalSrtText(srt);
 
-      const vtt = srtToVtt(srt);
-      setTrackFromVttText(vtt);
+      const finalVtt = buildFinalVtt(srt, 0, subtitlePosition);
+      setTrackFromVttText(finalVtt);
 
-      setStatus("✅ Video y subtítulos cargados (SRT convertido a VTT).");
+      setStatus("✅ Video y subtítulos cargados (SRT → VTT + posición aplicada).");
     } catch (err) {
       console.error(err);
       setStatus("❌ Error cargando SRT (casi seguro CORS o link inválido).");
     }
-  }, [setTrackFromVttText, srtToVtt, subsUrl, videoUrl]);
+  }, [buildFinalVtt, subsUrl, subtitlePosition, videoUrl, setTrackFromVttText]);
 
   const handleApplyOffset = useCallback(() => {
     if (!originalSrtText) {
@@ -118,31 +149,55 @@ export default function SrtVideoPlayer() {
       return;
     }
 
-    const vtt = srtToVtt(originalSrtText);
-    const shifted = applyOffsetToVtt(vtt, Number(offset || 0));
-
-    setTrackFromVttText(shifted);
+    const finalVtt = buildFinalVtt(originalSrtText, Number(offset || 0), subtitlePosition);
+    setTrackFromVttText(finalVtt);
     setStatus(`✅ Offset aplicado: ${Number(offset || 0)}s`);
-  }, [
-    applyOffsetToVtt,
-    offset,
-    originalSrtText,
-    setTrackFromVttText,
-    srtToVtt,
-  ]);
+  }, [buildFinalVtt, offset, originalSrtText, setTrackFromVttText, subtitlePosition]);
 
   const handleReset = useCallback(() => {
     setOffset(0);
+    setSubtitlePosition(50);
 
     if (!originalSrtText) {
-      setStatus("🔄 Offset reseteado a 0.");
+      setStatus("🔄 Reset completo (offset 0, posición 50%).");
       return;
     }
 
-    const vtt = srtToVtt(originalSrtText);
-    setTrackFromVttText(vtt);
-    setStatus("🔄 Offset reseteado a 0.");
-  }, [originalSrtText, setTrackFromVttText, srtToVtt]);
+    const finalVtt = buildFinalVtt(originalSrtText, 0, 50);
+    setTrackFromVttText(finalVtt);
+    setStatus("🔄 Reset completo (offset 0, posición 50%).");
+  }, [buildFinalVtt, originalSrtText, setTrackFromVttText]);
+
+  // ⬅️➡️ mover subtítulos
+  const moveLeft = useCallback(() => {
+    if (!originalSrtText) {
+      setStatus("❌ Primero carga los subtítulos.");
+      return;
+    }
+
+    setSubtitlePosition((prev) => {
+      const next = Math.max(0, prev - 5);
+      const finalVtt = buildFinalVtt(originalSrtText, Number(offset || 0), next);
+      setTrackFromVttText(finalVtt);
+      setStatus(`⬅️ Subtítulos movidos a la izquierda: position ${next}%`);
+      return next;
+    });
+  }, [buildFinalVtt, offset, originalSrtText, setTrackFromVttText]);
+
+  const moveRight = useCallback(() => {
+    if (!originalSrtText) {
+      setStatus("❌ Primero carga los subtítulos.");
+      return;
+    }
+
+    setSubtitlePosition((prev) => {
+      const next = Math.min(100, prev + 5);
+      const finalVtt = buildFinalVtt(originalSrtText, Number(offset || 0), next);
+      setTrackFromVttText(finalVtt);
+      setStatus(`➡️ Subtítulos movidos a la derecha: position ${next}%`);
+      return next;
+    });
+  }, [buildFinalVtt, offset, originalSrtText, setTrackFromVttText]);
 
   const hint = useMemo(() => {
     return (
@@ -153,8 +208,9 @@ export default function SrtVideoPlayer() {
         ✅ Offset negativo si van <b>adelantados</b> (ej:{" "}
         <code style={styles.code}>-2</code>)
         <br />
-        ⚠️ Si falla, casi siempre es por <b>CORS</b> (el servidor bloquea la
-        descarga del SRT).
+        ✅ Usa ⬅️➡️ para mover subtítulos si en iPad salen pegados.
+        <br />
+        ⚠️ Si falla, casi siempre es por <b>CORS</b>.
       </>
     );
   }, []);
@@ -164,7 +220,7 @@ export default function SrtVideoPlayer() {
       <div style={styles.card}>
         <h2 style={{ margin: "0 0 10px 0" }}>🎬 Player con SRT + Sync</h2>
 
-        {/* ✅ FIX iPad/Safari: Centrar subtítulos */}
+        {/* iPad/Safari: estilos extra */}
         <style>{`
           video::cue {
             text-align: center !important;
@@ -196,6 +252,21 @@ export default function SrtVideoPlayer() {
           Tu navegador no soporta video HTML5.
         </video>
 
+        {/* 🔥 NUEVO: Botones para mover subtítulos */}
+        <div style={styles.subtitleAdjustRow}>
+          <button type="button" onClick={moveLeft} style={styles.smallButton}>
+            ⬅️ Izquierda
+          </button>
+
+          <div style={styles.subtitleAdjustInfo}>
+            Posición: <b>{subtitlePosition}%</b>
+          </div>
+
+          <button type="button" onClick={moveRight} style={styles.smallButton}>
+            Derecha ➡️
+          </button>
+        </div>
+
         <div style={styles.controls}>
           <div style={styles.box}>
             <label style={styles.label}>Link del video (.mp4)</label>
@@ -226,11 +297,7 @@ export default function SrtVideoPlayer() {
               onChange={(e) => setOffset(Number(e.target.value))}
               style={styles.input}
             />
-            <button
-              type="button"
-              onClick={handleApplyOffset}
-              style={styles.button}
-            >
+            <button type="button" onClick={handleApplyOffset} style={styles.button}>
               Aplicar offset
             </button>
           </div>
@@ -241,7 +308,7 @@ export default function SrtVideoPlayer() {
               Cargar video + subs
             </button>
             <button type="button" onClick={handleReset} style={styles.button}>
-              Reset offset
+              Reset completo
             </button>
           </div>
         </div>
@@ -273,6 +340,30 @@ const styles: Record<string, React.CSSProperties> = {
     width: "100%",
     borderRadius: 12,
     background: "black",
+  },
+  subtitleAdjustRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 12,
+    background: "rgba(255,255,255,0.06)",
+  },
+  subtitleAdjustInfo: {
+    fontSize: 13,
+    opacity: 0.9,
+  },
+  smallButton: {
+    padding: "8px 10px",
+    borderRadius: 10,
+    border: "none",
+    background: "rgba(79,70,229,0.95)",
+    color: "white",
+    fontWeight: 600,
+    cursor: "pointer",
+    minWidth: 120,
   },
   controls: {
     display: "grid",
