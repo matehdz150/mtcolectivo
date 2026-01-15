@@ -164,7 +164,27 @@ export default function SrtVideoPlayer() {
       <div style={styles.card}>
         <h2 style={{ margin: "0 0 10px 0" }}>🎬 Player con SRT + Sync</h2>
 
-        <video ref={videoRef} controls crossOrigin="anonymous" style={styles.video}>
+        {/* ✅ FIX iPad/Safari: Centrar subtítulos */}
+        <style>{`
+          video::cue {
+            text-align: center !important;
+            line-height: 1.2 !important;
+            background: rgba(0, 0, 0, 0.55) !important;
+            color: #fff !important;
+            font-size: 16px !important;
+          }
+
+          video::-webkit-media-text-track-display {
+            text-align: center !important;
+          }
+        `}</style>
+
+        <video
+          ref={videoRef}
+          controls
+          crossOrigin="anonymous"
+          style={styles.video}
+        >
           <track
             ref={trackRef}
             label="Subtítulos"
@@ -206,7 +226,11 @@ export default function SrtVideoPlayer() {
               onChange={(e) => setOffset(Number(e.target.value))}
               style={styles.input}
             />
-            <button type="button" onClick={handleApplyOffset} style={styles.button}>
+            <button
+              type="button"
+              onClick={handleApplyOffset}
+              style={styles.button}
+            >
               Aplicar offset
             </button>
           </div>
