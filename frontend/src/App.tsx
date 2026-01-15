@@ -14,11 +14,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/video" element={<SrtVideoPlayer />} />
 
           {/* Rutas protegidas */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/video" element={<SrtVideoPlayer />} />
           </Route>
 
           <Route path="*" element={<h2>Página no encontrada</h2>} />
