@@ -13,7 +13,7 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<SrtVideoPlayer />} />
 
           {/* Rutas protegidas */}
           <Route element={<ProtectedRoute />}>
