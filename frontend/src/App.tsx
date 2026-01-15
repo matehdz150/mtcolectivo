@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import SrtVideoPlayer from "./pages/video";
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/video" element={<SrtVideoPlayer />} />
 
           {/* Rutas protegidas */}
           <Route element={<ProtectedRoute />}>
