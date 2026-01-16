@@ -11,15 +11,9 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function pickBgImage() {
-  return BG_IMAGES[Math.floor(Math.random() * BG_IMAGES.length)];
-}
-
 export default function SrtVideoPlayer() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trackRef = useRef<HTMLTrackElement | null>(null);
-
-  const [bgImage] = useState(() => pickBgImage());
 
   const [videoUrl, setVideoUrl] = useState("");
   const [subsUrl, setSubsUrl] = useState("");
@@ -248,26 +242,31 @@ export default function SrtVideoPlayer() {
 
   return (
     <div style={styles.page}>
-      {/* Background (más visible, casi sin blur) */}
-      <div
-        style={{
-          ...styles.bg,
-          backgroundImage: `url(${bgImage})`,
-        }}
-      />
+      {/* 🔥 Fondo mosaico: se ven TODAS las imágenes claras */}
+      <div style={styles.mosaic}>
+        {BG_IMAGES.map((src, i) => (
+          <div
+            key={src}
+            style={{
+              ...styles.mosaicTile,
+              backgroundImage: `url(${src})`,
+              transform: `scale(1.03) translateY(${i % 2 === 0 ? "-6px" : "6px"})`,
+            }}
+          />
+        ))}
+      </div>
 
-      {/* Overlay MUY ligero (no tapa la foto) */}
-      <div style={styles.bgOverlay} />
+      {/* Overlay suave para legibilidad (sin tapar fotos) */}
+      <div style={styles.overlaySoft} />
 
-      {/* Grain sutil (cinematic) */}
-      <div style={styles.grain} />
+      {/* Brillo sutil */}
+      <div style={styles.lightBloom} />
 
       <div style={styles.shell}>
-        {/* Topbar */}
         <div style={styles.topbar}>
           <div>
             <div style={styles.brand}>Para ceci {'<3'}</div>
-            <div style={styles.subtitle}>Minimal · Cinematic · iPad-friendly</div>
+            <div style={styles.subtitle}>Cinematic background · All photos visible</div>
           </div>
 
           <div style={styles.topPill}>
@@ -277,7 +276,6 @@ export default function SrtVideoPlayer() {
         </div>
 
         <div style={styles.grid}>
-          {/* Player */}
           <div style={styles.playerCard}>
             <style>{`
               video::cue {
@@ -319,7 +317,6 @@ export default function SrtVideoPlayer() {
             <div style={styles.hint}>{hint}</div>
           </div>
 
-          {/* Controls */}
           <div style={styles.controlsCard}>
             <div style={styles.sectionTitle}>Cargar</div>
 
@@ -400,8 +397,7 @@ export default function SrtVideoPlayer() {
             </div>
 
             <div style={styles.smallNote}>
-              Centro ideal: <b>50%</b>. Si Safari se “atora”, muévelo poquito y
-              regresa.
+              Centro ideal: <b>50%</b>.
             </div>
           </div>
         </div>
@@ -421,34 +417,38 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 18,
   },
 
-  // 🔥 Fondo más visible (sin blur agresivo)
-  bg: {
+  // 🔥 mosaico claro
+  mosaic: {
     position: "absolute",
     inset: 0,
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gridTemplateRows: "1fr 1fr",
+    gap: 0,
+  },
+
+  mosaicTile: {
     backgroundSize: "cover",
     backgroundPosition: "center",
-    transform: "scale(1.02)",
-    filter: "blur(4px) saturate(1.35) contrast(1.1)",
+    filter: "saturate(1.25) contrast(1.08)",
     opacity: 1,
   },
 
-  // 🔥 Overlay MUY ligero
-  bgOverlay: {
+  // overlay MUY suave para que se lea sin tapar fotos
+  overlaySoft: {
     position: "absolute",
     inset: 0,
     background:
-      "radial-gradient(1000px 520px at 18% 10%, rgba(79,70,229,0.18), transparent 62%), radial-gradient(900px 520px at 82% 18%, rgba(255,255,255,0.16), transparent 55%), linear-gradient(to bottom, rgba(0,0,0,0.18), rgba(0,0,0,0.38))",
+      "linear-gradient(to bottom, rgba(0,0,0,0.10), rgba(0,0,0,0.35))",
   },
 
-  // Grain para look cinematográfico
-  grain: {
+  // bloom de luz arriba
+  lightBloom: {
     position: "absolute",
     inset: 0,
+    background:
+      "radial-gradient(900px 500px at 20% 0%, rgba(255,255,255,0.18), transparent 60%), radial-gradient(800px 500px at 80% 10%, rgba(79,70,229,0.18), transparent 55%)",
     pointerEvents: "none",
-    backgroundImage:
-      "url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22 opacity=%220.18%22/%3E%3C/svg%3E')",
-    opacity: 0.12,
-    mixBlendMode: "overlay",
   },
 
   shell: {
@@ -466,8 +466,8 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 20,
     background: "rgba(0,0,0,0.22)",
     border: "1px solid rgba(255,255,255,0.14)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
     marginBottom: 14,
   },
 
@@ -501,7 +501,6 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 14,
   },
 
-  // 🔥 Cards ultra transparentes para que se vea el fondo
   playerCard: {
     borderRadius: 22,
     padding: 14,
