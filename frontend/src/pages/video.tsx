@@ -1,12 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 
-const BG_IMAGES = [
-  "https://plus.unsplash.com/premium_photo-1696945512425-9370bbf157cf?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1666533424151-aae0a59469d1?q=80&w=1035&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1562095693-c517d3352e97?q=80&w=1481&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1654715571646-f33deae8319a?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-];
-
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
@@ -18,11 +11,12 @@ export default function SrtVideoPlayer() {
   const [videoUrl, setVideoUrl] = useState("");
   const [subsUrl, setSubsUrl] = useState("");
   const [offset, setOffset] = useState<number>(0);
-
   const [subtitlePosition, setSubtitlePosition] = useState<number>(50);
 
   const [status, setStatus] = useState<string>("");
   const [originalSrtText, setOriginalSrtText] = useState<string>("");
+
+  const [showUI, setShowUI] = useState<boolean>(false);
 
   const setTrackFromVttText = useCallback((vttText: string) => {
     const video = videoRef.current;
@@ -53,46 +47,40 @@ export default function SrtVideoPlayer() {
     const m = parseInt(parts[1], 10);
     const s = parseFloat(parts[2]);
 
-    let total = h * 3600 + m * 60 + s;
-    total += offsetSeconds;
+    let total = h * 3600 + m * 60 + s + offsetSeconds;
     if (total < 0) total = 0;
 
-    const newH = Math.floor(total / 3600);
-    const newM = Math.floor((total % 3600) / 60);
-    const newS = (total % 60).toFixed(3);
-
-    const hh = String(newH).padStart(2, "0");
-    const mm = String(newM).padStart(2, "0");
-    const ss = String(newS).padStart(6, "0");
+    const hh = String(Math.floor(total / 3600)).padStart(2, "0");
+    const mm = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+    const ss = String((total % 60).toFixed(3)).padStart(6, "0");
 
     return `${hh}:${mm}:${ss}`;
   }, []);
 
   const applyOffsetToVtt = useCallback(
-    (vttText: string, offsetSeconds: number) => {
-      return vttText.replace(
+    (vttText: string, offsetSeconds: number) =>
+      vttText.replace(
         /(\d{2}:\d{2}:\d{2}\.\d{3})\s-->\s(\d{2}:\d{2}:\d{2}\.\d{3})/g,
-        (_match, start, end) => {
-          const ns = shiftVttTime(start, offsetSeconds);
-          const ne = shiftVttTime(end, offsetSeconds);
-          return `${ns} --> ${ne}`;
-        }
-      );
-    },
+        (_, start, end) =>
+          `${shiftVttTime(start, offsetSeconds)} --> ${shiftVttTime(
+            end,
+            offsetSeconds
+          )}`
+      ),
     [shiftVttTime]
   );
 
   const applyHorizontalPositionToVtt = useCallback(
-    (vttText: string, positionPercent: number) => {
-      const pos = clamp(positionPercent, 0, 100);
-
-      return vttText.replace(
-        /(\d{2}:\d{2}:\d{2}\.\d{3})\s-->\s(\d{2}:\d{2}:\d{2}\.\d{3})(.*)$/gm,
-        (_match, start, end) => {
-          return `${start} --> ${end} line:90% position:${pos}% align:middle`;
-        }
-      );
-    },
+    (vttText: string, positionPercent: number) =>
+      vttText.replace(
+        /(\d{2}:\d{2}:\d{2}\.\d{3})\s-->\s(\d{2}:\d{2}:\d{2}\.\d{3}).*$/gm,
+        (_, start, end) =>
+          `${start} --> ${end} line:90% position:${clamp(
+            positionPercent,
+            0,
+            100
+          )}% align:middle`
+      ),
     []
   );
 
@@ -104,29 +92,22 @@ export default function SrtVideoPlayer() {
   }
 
   const buildFinalVtt = useCallback(
-    (srtText: string, offsetSeconds: number, posPercent: number) => {
-      const baseVtt = srtToVtt(srtText);
-      const shifted = applyOffsetToVtt(baseVtt, offsetSeconds);
-      const positioned = applyHorizontalPositionToVtt(shifted, posPercent);
-      return positioned;
-    },
+    (srt: string, off: number, pos: number) =>
+      applyHorizontalPositionToVtt(
+        applyOffsetToVtt(srtToVtt(srt), off),
+        pos
+      ),
     [applyHorizontalPositionToVtt, applyOffsetToVtt, srtToVtt]
   );
 
   const handleLoad = useCallback(async () => {
-    if (!videoUrl.trim()) {
-      setStatus("Pon el link del video.");
-      return;
-    }
-    if (!subsUrl.trim()) {
-      setStatus("Pon el link del subtítulo (.srt).");
+    if (!videoUrl || !subsUrl) {
+      setStatus("Pon el link del video y subtítulos.");
       return;
     }
 
     try {
-      setStatus("Cargando video…");
-      setOriginalSrtText("");
-
+      setStatus("Cargando…");
       const video = videoRef.current;
       if (video) {
         video.src = videoUrl.trim();
@@ -136,549 +117,231 @@ export default function SrtVideoPlayer() {
       const srt = await loadSrtFromUrl(subsUrl.trim());
       setOriginalSrtText(srt);
 
-      const finalVtt = buildFinalVtt(srt, 0, subtitlePosition);
-      setTrackFromVttText(finalVtt);
-
-      setStatus("Listo ✨ Subtítulos cargados.");
-    } catch (err) {
-      console.error(err);
-      setStatus("Error cargando SRT (probable CORS o link inválido).");
+      setTrackFromVttText(buildFinalVtt(srt, 0, subtitlePosition));
+      setStatus("Listo ✨");
+    } catch {
+      setStatus("Error cargando subtítulos (CORS o link inválido).");
     }
-  }, [buildFinalVtt, subsUrl, subtitlePosition, videoUrl, setTrackFromVttText]);
+  }, [videoUrl, subsUrl, subtitlePosition, buildFinalVtt, setTrackFromVttText]);
 
   const handleApplyOffset = useCallback(() => {
-    if (!originalSrtText) {
-      setStatus("Primero carga los subtítulos.");
-      return;
-    }
-
-    const finalVtt = buildFinalVtt(
-      originalSrtText,
-      Number(offset || 0),
-      subtitlePosition
+    if (!originalSrtText) return;
+    setTrackFromVttText(
+      buildFinalVtt(originalSrtText, offset, subtitlePosition)
     );
-    setTrackFromVttText(finalVtt);
-    setStatus(`Offset aplicado: ${Number(offset || 0)}s`);
-  }, [
-    buildFinalVtt,
-    offset,
-    originalSrtText,
-    setTrackFromVttText,
-    subtitlePosition,
-  ]);
+    setStatus(`Offset aplicado: ${offset}s`);
+  }, [originalSrtText, offset, subtitlePosition, buildFinalVtt, setTrackFromVttText]);
 
-  const handleReset = useCallback(() => {
-    setOffset(0);
-    setSubtitlePosition(50);
-
-    if (!originalSrtText) {
-      setStatus("Reset listo.");
-      return;
-    }
-
-    const finalVtt = buildFinalVtt(originalSrtText, 0, 50);
-    setTrackFromVttText(finalVtt);
-    setStatus("Reset listo.");
-  }, [buildFinalVtt, originalSrtText, setTrackFromVttText]);
-
-  const moveLeft = useCallback(() => {
-    if (!originalSrtText) {
-      setStatus("Primero carga los subtítulos.");
-      return;
-    }
-
-    setSubtitlePosition((prev) => {
-      const next = clamp(prev - 5, 0, 100);
-      const finalVtt = buildFinalVtt(originalSrtText, Number(offset || 0), next);
-      setTrackFromVttText(finalVtt);
-      setStatus(`Subtítulos: ${next}%`);
-      return next;
+  const move = (delta: number) => {
+    if (!originalSrtText) return;
+    setSubtitlePosition((p) => {
+      const n = clamp(p + delta, 0, 100);
+      setTrackFromVttText(buildFinalVtt(originalSrtText, offset, n));
+      return n;
     });
-  }, [buildFinalVtt, offset, originalSrtText, setTrackFromVttText]);
+  };
 
-  const moveRight = useCallback(() => {
-    if (!originalSrtText) {
-      setStatus("Primero carga los subtítulos.");
-      return;
-    }
-
-    setSubtitlePosition((prev) => {
-      const next = clamp(prev + 5, 0, 100);
-      const finalVtt = buildFinalVtt(originalSrtText, Number(offset || 0), next);
-      setTrackFromVttText(finalVtt);
-      setStatus(`Subtítulos: ${next}%`);
-      return next;
-    });
-  }, [buildFinalVtt, offset, originalSrtText, setTrackFromVttText]);
-
-  const handlePositionSlider = useCallback(
-    (value: number) => {
-      const next = clamp(value, 0, 100);
-      setSubtitlePosition(next);
-
-      if (!originalSrtText) return;
-
-      const finalVtt = buildFinalVtt(originalSrtText, Number(offset || 0), next);
-      setTrackFromVttText(finalVtt);
-      setStatus(`Subtítulos: ${next}%`);
-    },
-    [buildFinalVtt, offset, originalSrtText, setTrackFromVttText]
-  );
-
-  const hint = useMemo(() => {
-    return (
+  const hint = useMemo(
+    () => (
       <>
-        <span style={{ opacity: 0.95 }}>
-          Si en iPad salen pegados, ajusta <b>posición</b>.
-        </span>
-        <div style={{ height: 6 }} />
-        <span style={{ opacity: 0.8 }}>
-          Offset + atrasado (<code style={styles.code}>+1.5</code>) · Offset -
-          adelantado (<code style={styles.code}>-2</code>)
-        </span>
+        <b>Tip iPad:</b> mueve la posición si se pegan.
+        <br />
+        Offset + retrasa · Offset - adelanta
       </>
-    );
-  }, []);
+    ),
+    []
+  );
 
   return (
     <div style={styles.page}>
-      {/* 🔥 Fondo mosaico: se ven TODAS las imágenes claras */}
-      <div style={styles.mosaic}>
-        {BG_IMAGES.map((src, i) => (
-          <div
-            key={src}
-            style={{
-              ...styles.mosaicTile,
-              backgroundImage: `url(${src})`,
-              transform: `scale(1.03) translateY(${i % 2 === 0 ? "-6px" : "6px"})`,
-            }}
-          />
-        ))}
-      </div>
+      {/* BOTÓN SIEMPRE VISIBLE */}
+      <button style={styles.toggleBtn} onClick={() => setShowUI(v => !v)}>
+        {showUI ? "Ocultar configuración" : "Mostrar configuración"}
+      </button>
 
-      {/* Overlay suave para legibilidad (sin tapar fotos) */}
-      <div style={styles.overlaySoft} />
-
-      {/* Brillo sutil */}
-      <div style={styles.lightBloom} />
-
-      <div style={styles.shell}>
-        <div style={styles.topbar}>
-          <div>
-            <div style={styles.brand}>Para ceci {'<3'}</div>
-            <div style={styles.subtitle}>Cinematic background · All photos visible</div>
+      {showUI && (
+        <div style={styles.shell}>
+          <div style={styles.topbar}>
+            <div>
+              <div style={styles.brand}>Para ceci {"<3"}</div>
+              <div style={styles.subtitle}>Siempre visible</div>
+            </div>
+            <div style={styles.topPill}>{subtitlePosition}%</div>
           </div>
 
-          <div style={styles.topPill}>
-            <span style={{ opacity: 0.85 }}>Posición</span>
-            <b style={{ marginLeft: 8 }}>{subtitlePosition}%</b>
-          </div>
-        </div>
+          <div style={styles.grid}>
+            <div>
+              <style>{`
+                video::cue {
+                  background: rgba(0,0,0,0.55);
+                  color: white;
+                  font-size: 16px;
+                  line-height: 1.2;
+                }
+              `}</style>
 
-        <div style={styles.grid}>
-          <div style={styles.playerCard}>
-            <style>{`
-              video::cue {
-                text-align: center !important;
-                line-height: 1.2 !important;
-                background: rgba(0, 0, 0, 0.50) !important;
-                color: #fff !important;
-                font-size: 16px !important;
-              }
-              video::-webkit-media-text-track-display {
-                text-align: center !important;
-              }
-            `}</style>
+              <div style={styles.videoFrame}>
+                <video ref={videoRef} controls style={styles.video}>
+                  <track ref={trackRef} kind="subtitles" srcLang="es" default />
+                </video>
+              </div>
 
-            <div style={styles.videoFrame}>
-              <video
-                ref={videoRef}
-                controls
-                crossOrigin="anonymous"
-                style={styles.video}
-              >
-                <track
-                  ref={trackRef}
-                  label="Subtítulos"
-                  kind="subtitles"
-                  srcLang="es"
-                  src=""
-                  default
-                />
-                Tu navegador no soporta video HTML5.
-              </video>
+              <div style={styles.status}>{status}</div>
+              <div style={styles.hint}>{hint}</div>
             </div>
 
-            <div style={styles.statusRow}>
-              <div style={styles.statusDot} />
-              <div style={styles.statusText}>{status || "Listo para cargar."}</div>
-            </div>
-
-            <div style={styles.hint}>{hint}</div>
-          </div>
-
-          <div style={styles.controlsCard}>
-            <div style={styles.sectionTitle}>Cargar</div>
-
-            <div style={styles.field}>
-              <label style={styles.label}>Video (.mp4)</label>
+            <div style={styles.controlsCard}>
               <input
+                style={styles.input}
+                placeholder="Video .mp4"
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="https://..."
-                style={styles.input}
               />
-            </div>
-
-            <div style={styles.field}>
-              <label style={styles.label}>Subtítulos (.srt)</label>
               <input
+                style={styles.input}
+                placeholder="Subtítulos .srt"
                 value={subsUrl}
                 onChange={(e) => setSubsUrl(e.target.value)}
-                placeholder="https://...subtitles.srt"
-                style={styles.input}
               />
-            </div>
 
-            <div style={styles.actionsRow}>
-              <button type="button" onClick={handleLoad} style={styles.primaryBtn}>
+              <button style={styles.primaryBtn} onClick={handleLoad}>
                 Cargar
-              </button>
-              <button type="button" onClick={handleReset} style={styles.ghostBtn}>
-                Reset
-              </button>
-            </div>
-
-            <div style={styles.divider} />
-
-            <div style={styles.sectionTitle}>Sincronización</div>
-
-            <div style={styles.field}>
-              <label style={styles.label}>Offset (segundos)</label>
-              <div style={styles.inline}>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={offset}
-                  onChange={(e) => setOffset(Number(e.target.value))}
-                  style={{ ...styles.input, flex: 1 }}
-                />
-                <button
-                  type="button"
-                  onClick={handleApplyOffset}
-                  style={styles.secondaryBtn}
-                >
-                  Aplicar
-                </button>
-              </div>
-            </div>
-
-            <div style={styles.divider} />
-
-            <div style={styles.sectionTitle}>Posición (iPad fix)</div>
-
-            <div style={styles.subtitleAdjustRow}>
-              <button type="button" onClick={moveLeft} style={styles.iconBtn}>
-                ⬅️
               </button>
 
               <input
-                type="range"
-                min={0}
-                max={100}
-                value={subtitlePosition}
-                onChange={(e) => handlePositionSlider(Number(e.target.value))}
-                style={styles.slider}
+                type="number"
+                step="0.1"
+                value={offset}
+                onChange={(e) => setOffset(Number(e.target.value))}
+                style={styles.input}
               />
 
-              <button type="button" onClick={moveRight} style={styles.iconBtn}>
-                ➡️
+              <button style={styles.secondaryBtn} onClick={handleApplyOffset}>
+                Aplicar offset
               </button>
-            </div>
 
-            <div style={styles.smallNote}>
-              Centro ideal: <b>50%</b>.
+              <div style={styles.row}>
+                <button onClick={() => move(-5)}>⬅️</button>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={subtitlePosition}
+                  onChange={(e) =>
+                    move(Number(e.target.value) - subtitlePosition)
+                  }
+                />
+                <button onClick={() => move(5)}>➡️</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* 👇 ESTO ES LO QUE HACE QUE SCROLLEE */}
+      <div style={{ height: "150vh" }} />
     </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
-    position: "relative",
     minHeight: "100vh",
-    overflow: "hidden",
-    fontFamily:
-      "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial",
-    color: "rgba(255,255,255,0.94)",
+    width: "100%",
     padding: 18,
+    color: "white",
+
+    backgroundImage: "url('/ceci2.png')",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "top center",
+    backgroundSize: "100% auto",
+    backgroundAttachment: "scroll",
+
+    fontFamily: "system-ui",
   },
 
-  // 🔥 mosaico claro
-  mosaic: {
-    position: "absolute",
-    inset: 0,
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gridTemplateRows: "1fr 1fr",
-    gap: 0,
-  },
-
-  mosaicTile: {
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    filter: "saturate(1.25) contrast(1.08)",
-    opacity: 1,
-  },
-
-  // overlay MUY suave para que se lea sin tapar fotos
-  overlaySoft: {
-    position: "absolute",
-    inset: 0,
-    background:
-      "linear-gradient(to bottom, rgba(0,0,0,0.10), rgba(0,0,0,0.35))",
-  },
-
-  // bloom de luz arriba
-  lightBloom: {
-    position: "absolute",
-    inset: 0,
-    background:
-      "radial-gradient(900px 500px at 20% 0%, rgba(255,255,255,0.18), transparent 60%), radial-gradient(800px 500px at 80% 10%, rgba(79,70,229,0.18), transparent 55%)",
-    pointerEvents: "none",
+  toggleBtn: {
+    position: "fixed",
+    top: 18,
+    right: 18,
+    zIndex: 10,
+    padding: "10px 14px",
+    borderRadius: 14,
+    background: "rgba(0,0,0,0.45)",
+    color: "white",
+    border: "1px solid rgba(255,255,255,0.3)",
+    cursor: "pointer",
+    backdropFilter: "blur(6px)",
   },
 
   shell: {
-    position: "relative",
-    maxWidth: 1120,
-    margin: "0 auto",
+    maxWidth: 1100,
+    margin: "80px auto 0",
   },
 
   topbar: {
     display: "flex",
-    alignItems: "center",
     justifyContent: "space-between",
-    gap: 12,
-    padding: "14px 14px",
-    borderRadius: 20,
-    background: "rgba(0,0,0,0.22)",
-    border: "1px solid rgba(255,255,255,0.14)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
-    marginBottom: 14,
+    marginBottom: 16,
   },
 
-  brand: {
-    fontSize: 18,
-    fontWeight: 800,
-    letterSpacing: -0.2,
-  },
-
-  subtitle: {
-    fontSize: 12,
-    opacity: 0.75,
-    marginTop: 2,
-  },
-
-  topPill: {
-    display: "flex",
-    alignItems: "center",
-    borderRadius: 999,
-    padding: "8px 12px",
-    background: "rgba(255,255,255,0.10)",
-    border: "1px solid rgba(255,255,255,0.14)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
-    fontSize: 13,
-  },
+  brand: { fontWeight: 800 },
+  subtitle: { opacity: 0.7 },
+  topPill: { opacity: 0.9 },
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "1.55fr 1fr",
+    gridTemplateColumns: "1.5fr 1fr",
     gap: 14,
   },
 
-  playerCard: {
-    borderRadius: 22,
-    padding: 14,
-    background: "rgba(0,0,0,0.18)",
-    border: "1px solid rgba(255,255,255,0.16)",
-    boxShadow: "0 20px 70px rgba(0,0,0,0.35)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
-  },
-
-  controlsCard: {
-    borderRadius: 22,
-    padding: 14,
-    background: "rgba(0,0,0,0.18)",
-    border: "1px solid rgba(255,255,255,0.16)",
-    boxShadow: "0 20px 70px rgba(0,0,0,0.35)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
-  },
-
   videoFrame: {
-    borderRadius: 18,
+    borderRadius: 16,
     overflow: "hidden",
-    border: "1px solid rgba(255,255,255,0.16)",
-    background: "rgba(0,0,0,0.35)",
-    boxShadow: "0 16px 40px rgba(0,0,0,0.35)",
   },
 
   video: {
     width: "100%",
-    display: "block",
-    background: "black",
     aspectRatio: "16 / 9",
+    background: "black",
   },
 
-  statusRow: {
-    display: "flex",
-    alignItems: "center",
+  status: { marginTop: 8, opacity: 0.9 },
+  hint: { fontSize: 12, opacity: 0.8 },
+
+  controlsCard: {
+    display: "grid",
     gap: 10,
-    marginTop: 12,
-    padding: "10px 12px",
-    borderRadius: 16,
-    background: "rgba(255,255,255,0.10)",
-    border: "1px solid rgba(255,255,255,0.14)",
-  },
-
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 999,
-    background: "rgba(79,70,229,0.95)",
-    boxShadow: "0 0 0 6px rgba(79,70,229,0.16)",
-  },
-
-  statusText: {
-    fontSize: 13,
-    opacity: 0.92,
-  },
-
-  hint: {
-    marginTop: 10,
-    fontSize: 13,
-    opacity: 0.9,
-    lineHeight: 1.35,
-    padding: "0 4px",
-  },
-
-  sectionTitle: {
-    fontSize: 13,
-    opacity: 0.85,
-    fontWeight: 800,
-    letterSpacing: 0.2,
-    marginBottom: 10,
-  },
-
-  field: {
-    marginBottom: 12,
-  },
-
-  label: {
-    display: "block",
-    fontSize: 12,
-    opacity: 0.75,
-    marginBottom: 6,
   },
 
   input: {
-    width: "100%",
-    padding: "10px 12px",
-    borderRadius: 16,
-    border: "1px solid rgba(255,255,255,0.16)",
-    background: "rgba(0,0,0,0.25)",
-    color: "rgba(255,255,255,0.95)",
-    outline: "none",
-  },
-
-  actionsRow: {
-    display: "flex",
-    gap: 10,
-  },
-
-  inline: {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
+    padding: 10,
+    borderRadius: 14,
+    border: "1px solid rgba(255,255,255,0.4)",
+    background: "rgba(0,0,0,0.15)",
+    color: "white",
   },
 
   primaryBtn: {
-    flex: 1,
-    padding: "10px 12px",
-    borderRadius: 16,
-    border: "1px solid rgba(255,255,255,0.16)",
-    background:
-      "linear-gradient(135deg, rgba(79,70,229,0.95), rgba(124,58,237,0.85))",
+    padding: 10,
+    borderRadius: 14,
+    background: "rgba(79,70,229,0.9)",
     color: "white",
     fontWeight: 800,
     cursor: "pointer",
   },
 
   secondaryBtn: {
-    padding: "10px 12px",
-    borderRadius: 16,
-    border: "1px solid rgba(255,255,255,0.16)",
-    background: "rgba(255,255,255,0.12)",
-    color: "rgba(255,255,255,0.95)",
-    fontWeight: 750,
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-  },
-
-  ghostBtn: {
-    padding: "10px 12px",
-    borderRadius: 16,
-    border: "1px solid rgba(255,255,255,0.16)",
-    background: "rgba(0,0,0,0.18)",
-    color: "rgba(255,255,255,0.95)",
-    fontWeight: 750,
+    padding: 10,
+    borderRadius: 14,
+    background: "rgba(255,255,255,0.2)",
+    color: "white",
     cursor: "pointer",
   },
 
-  divider: {
-    height: 1,
-    background: "rgba(255,255,255,0.14)",
-    margin: "14px 0",
-  },
-
-  subtitleAdjustRow: {
+  row: {
     display: "flex",
     alignItems: "center",
     gap: 10,
-  },
-
-  iconBtn: {
-    width: 46,
-    height: 44,
-    borderRadius: 16,
-    border: "1px solid rgba(255,255,255,0.16)",
-    background: "rgba(0,0,0,0.18)",
-    color: "rgba(255,255,255,0.95)",
-    fontWeight: 900,
-    cursor: "pointer",
-  },
-
-  slider: {
-    width: "100%",
-    accentColor: "rgba(79,70,229,0.95)" as any,
-  },
-
-  smallNote: {
-    marginTop: 10,
-    fontSize: 12,
-    opacity: 0.78,
-    lineHeight: 1.35,
-  },
-
-  code: {
-    background: "rgba(255,255,255,0.14)",
-    padding: "2px 6px",
-    borderRadius: 10,
   },
 };
