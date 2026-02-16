@@ -7,7 +7,7 @@ import {
   ServicePrice,
 } from "../services/prices";
 
-import "./PricesPage.scss";
+import "./Prices.scss";
 
 const DEFAULT_SERVICE_ID = 1;
 
