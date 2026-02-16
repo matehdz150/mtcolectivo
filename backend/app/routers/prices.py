@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models import ServicePrice, Service
 from app.database import SessionLocal
 from app.deps import get_current_user
+from seed import run as run_seed
 
 price_router = APIRouter(
     prefix="/service-prices",
@@ -75,3 +76,8 @@ def delete_price(price_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"status": "deleted"}
+
+@price_router.post("/seed")
+def seed_prices(db: Session = Depends(get_db)):
+    run_seed()
+    return {"status": "seed executed"}

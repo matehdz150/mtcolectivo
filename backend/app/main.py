@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.routers import pdf, orders, auth
 from app.routers.orders import public_router, private_router
+from app.routers.services import price_router
 
 app = FastAPI(
     title="MT Colectivo API",
@@ -32,6 +33,8 @@ app.include_router(pdf.router)
 
 # 🟢 PUBLICO: Google Forms puede entrar aquí
 app.include_router(public_router)
+app.include_router(price_router)
+
 
 # 🔐 PRIVADO
 app.include_router(private_router)
