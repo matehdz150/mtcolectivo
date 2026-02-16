@@ -11,8 +11,14 @@ import {
   Cell,
 } from "recharts";
 import { fetchStats } from "../services/orders";
-import "./Stats.scss";
 import Sidebar from "../components/Sidebar";
+import {
+  DollarSign,
+  TrendingUp,
+  Receipt,
+  CreditCard,
+} from "lucide-react";
+import "./Stats.scss";
 
 type StatsData = {
   finanzas: any;
@@ -27,7 +33,8 @@ export default function Stats() {
     fetchStats().then(setData);
   }, []);
 
-  if (!data) return <div className="stats-loading">Cargando estadísticas...</div>;
+  if (!data)
+    return <div className="stats-loading">Cargando estadísticas...</div>;
 
   const { finanzas, operacion, mes_actual } = data;
 
@@ -50,101 +57,120 @@ export default function Stats() {
   const COLORS = ["#6366f1", "#ef4444"];
 
   return (
-    <div className="stats-page">
-        <Sidebar/>
+    <div className="stats-layout">
+      <Sidebar />
 
-      <h2>Estadísticas generales</h2>
+      <div className="stats-page">
+        <header className="stats-header">
+          <h2>Estadísticas generales</h2>
+          <p>Resumen financiero y operativo</p>
+        </header>
 
-      {/* ===== KPI CARDS ===== */}
-      <div className="kpi-grid">
-        <div className="kpi-card">
-          <span>Total facturado</span>
-          <h3>${finanzas.total_facturado.toLocaleString()}</h3>
+        {/* ===== KPI CARDS ===== */}
+        <div className="kpi-grid">
+          <div className="kpi-card">
+            <div className="kpi-icon purple">
+              <DollarSign size={18} />
+            </div>
+            <div>
+              <span>Total facturado</span>
+              <h3>${finanzas.total_facturado.toLocaleString()}</h3>
+            </div>
+          </div>
+
+          <div className="kpi-card">
+            <div className="kpi-icon orange">
+              <Receipt size={18} />
+            </div>
+            <div>
+              <span>Total pendiente</span>
+              <h3>${finanzas.total_pendiente.toLocaleString()}</h3>
+            </div>
+          </div>
+
+          <div className="kpi-card">
+            <div className="kpi-icon green">
+              <TrendingUp size={18} />
+            </div>
+            <div>
+              <span>Órdenes totales</span>
+              <h3>{operacion.total_ordenes}</h3>
+            </div>
+          </div>
+
+          <div className="kpi-card">
+            <div className="kpi-icon blue">
+              <CreditCard size={18} />
+            </div>
+            <div>
+              <span>Ticket promedio</span>
+              <h3>${finanzas.ticket_promedio.toFixed(2)}</h3>
+            </div>
+          </div>
         </div>
 
-        <div className="kpi-card">
-          <span>Total pendiente</span>
-          <h3>${finanzas.total_pendiente.toLocaleString()}</h3>
+        {/* ===== CHARTS ===== */}
+        <div className="charts-grid">
+          <div className="chart-card">
+            <h4>Estado financiero</h4>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={moneyData}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#6366f1" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="chart-card">
+            <h4>Mes actual</h4>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={monthlyData}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#16a34a" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="chart-card">
+            <h4>Ingresos vs Descuentos</h4>
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  outerRadius={85}
+                  label
+                >
+                  {pieData.map((_, index) => (
+                    <Cell key={index} fill={COLORS[index]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        <div className="kpi-card">
-          <span>Órdenes totales</span>
-          <h3>{operacion.total_ordenes}</h3>
-        </div>
-
-        <div className="kpi-card">
-          <span>Ticket promedio</span>
-          <h3>${finanzas.ticket_promedio.toFixed(2)}</h3>
+        {/* ===== EXTRA INFO ===== */}
+        <div className="extra-info">
+          <div>
+            <strong>Capacidad más solicitada:</strong>{" "}
+            {operacion.capacidad_mas_solicitada} pasajeros
+          </div>
+          <div>
+            <strong>Destino más frecuente:</strong>{" "}
+            {operacion.destino_mas_frecuente}
+          </div>
+          <div>
+            <strong>% promedio descuento:</strong>{" "}
+            {finanzas.porcentaje_promedio_descuento.toFixed(2)}%
+          </div>
         </div>
       </div>
-
-      {/* ===== CHARTS ===== */}
-      <div className="charts-grid">
-
-        {/* Finanzas */}
-        <div className="chart-card">
-          <h4>Estado financiero</h4>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={moneyData}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Mes actual */}
-        <div className="chart-card">
-          <h4>Mes actual</h4>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={monthlyData}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Descuentos vs Ingresos */}
-        <div className="chart-card">
-          <h4>Ingresos vs Descuentos</h4>
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                dataKey="value"
-                outerRadius={80}
-                label
-              >
-                {pieData.map((_, index) => (
-                  <Cell key={index} fill={COLORS[index]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-      </div>
-
-      {/* ===== EXTRA INFO ===== */}
-      <div className="extra-info">
-        <div>
-          <strong>Capacidad más solicitada:</strong>{" "}
-          {operacion.capacidad_mas_solicitada} pasajeros
-        </div>
-        <div>
-          <strong>Destino más frecuente:</strong>{" "}
-          {operacion.destino_mas_frecuente}
-        </div>
-        <div>
-          <strong>% promedio descuento:</strong>{" "}
-          {finanzas.porcentaje_promedio_descuento.toFixed(2)}%
-        </div>
-      </div>
-
     </div>
   );
 }
