@@ -400,10 +400,11 @@ export default function Dashboard() {
 
         <section className="orders-filters">
           <div className="filters-row filters-row--primary">
+            {/* 🔎 Búsqueda */}
             <div className="filter search">
               <input
                 type="text"
-                placeholder="Buscar cliente…"
+                placeholder="Buscar por cliente o ID…"
                 value={filters.name}
                 onChange={(e) =>
                   setFilters({ ...filters, name: e.target.value })
@@ -411,6 +412,7 @@ export default function Dashboard() {
               />
             </div>
 
+            {/* 🔃 Ordenamiento */}
             <div className="filter sort">
               <select
                 value={filters.sortField}
@@ -421,9 +423,9 @@ export default function Dashboard() {
                   })
                 }
               >
-                <option value="fecha">Ordenar por fecha</option>
-                <option value="nombre">Ordenar por nombre</option>
-                <option value="total">Ordenar por precio</option>
+                <option value="fecha">🕒 Fecha</option>
+                <option value="nombre">🔤 Cliente</option>
+                <option value="total">💰 Monto</option>
               </select>
 
               <button
@@ -435,11 +437,21 @@ export default function Dashboard() {
                   })
                 }
               >
-                {filters.sortDir === "asc" ? "↑ Ascendente" : "↓ Descendente"}
+                {filters.sortField === "fecha" &&
+                  (filters.sortDir === "asc"
+                    ? "Más antiguas"
+                    : "Más recientes")}
+
+                {filters.sortField === "total" &&
+                  (filters.sortDir === "asc" ? "Menor monto" : "Mayor monto")}
+
+                {filters.sortField === "nombre" &&
+                  (filters.sortDir === "asc" ? "A → Z" : "Z → A")}
               </button>
             </div>
           </div>
 
+          {/* 📊 Filtros secundarios */}
           <div className="filters-row filters-row--secondary">
             <input
               type="date"
@@ -447,6 +459,7 @@ export default function Dashboard() {
               onChange={(e) =>
                 setFilters({ ...filters, dateFrom: e.target.value })
               }
+              title="Desde fecha"
             />
 
             <input
@@ -455,11 +468,12 @@ export default function Dashboard() {
               onChange={(e) =>
                 setFilters({ ...filters, dateTo: e.target.value })
               }
+              title="Hasta fecha"
             />
 
             <input
               type="number"
-              placeholder="Min $"
+              placeholder="Monto mínimo"
               value={filters.minTotal}
               onChange={(e) =>
                 setFilters({ ...filters, minTotal: e.target.value })
@@ -468,7 +482,7 @@ export default function Dashboard() {
 
             <input
               type="number"
-              placeholder="Max $"
+              placeholder="Monto máximo"
               value={filters.maxTotal}
               onChange={(e) =>
                 setFilters({ ...filters, maxTotal: e.target.value })
@@ -477,7 +491,7 @@ export default function Dashboard() {
 
             <input
               type="number"
-              placeholder="Min pasajeros"
+              placeholder="Pasajeros mín."
               value={filters.minCapacidad}
               onChange={(e) =>
                 setFilters({ ...filters, minCapacidad: e.target.value })
@@ -486,7 +500,7 @@ export default function Dashboard() {
 
             <input
               type="number"
-              placeholder="Max pasajeros"
+              placeholder="Pasajeros máx."
               value={filters.maxCapacidad}
               onChange={(e) =>
                 setFilters({ ...filters, maxCapacidad: e.target.value })
