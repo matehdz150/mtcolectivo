@@ -503,8 +503,6 @@ export default function Dashboard() {
           <div className="orders-pro__head">
             <div className="col col--cliente">Cliente</div>
             <div className="col col--total">Total</div>
-            <div className="col col--fecha">Fecha</div>
-            <div className="col col--hora">Hora</div>
             <div className="col col--acciones">Acciones</div>
           </div>
 
