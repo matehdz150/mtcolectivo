@@ -1,36 +1,43 @@
 import "./Sidebar.scss";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
-type SidebarProps = { onUploadClick?: () => void };
-
-export default function Sidebar({ onUploadClick }: SidebarProps) {
+export default function Sidebar() {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();                   // limpia token en contexto y localStorage
-    navigate("/login", { replace: true }); // redirige y evita volver con "atrás"
+    logout();
+    navigate("/login", { replace: true });
   };
 
   return (
     <aside className="sidebar">
-      <div className="brand">
-        <span className="logo">MT</span>
-        <span className="title">Colectivo</span>
+      <div className="sidebar__brand">
+        <div className="logo">MT</div>
+        <div className="brand-text">
+          <h3>MT Colectivo</h3>
+          <span>Panel administrativo</span>
+        </div>
       </div>
 
-      <nav className="menu">
-        <button className="menu-item active" type="button" onClick={onUploadClick}>
-          Subir Excel
-        </button>
+      <nav className="sidebar__nav">
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
+        >
+          📊 Dashboard
+        </NavLink>
       </nav>
 
-      <div className="spacer" />
-      <button className="logout-btn" onClick={handleLogout}>
-        <span>⎋</span> Salir
-      </button>
-      <div className="foot">v1.0.0</div>
+      <div className="sidebar__footer">
+        <button className="logout-btn" onClick={handleLogout}>
+          ⎋ Cerrar sesión
+        </button>
+        <div className="version">v1.0.0</div>
+      </div>
     </aside>
   );
 }
