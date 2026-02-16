@@ -10,6 +10,7 @@ from app.database import SessionLocal
 from app.models import Order, Service
 from app.deps import get_current_user
 from app.schemas import User
+import unicodedata
 
 # ================================
 # 🔐 API KEY para Google Forms
@@ -171,6 +172,37 @@ def fix_db(db: Session = Depends(get_db)):
 
     return {"status": "ok"}
 
+
+def normalize(text: str) -> str:
+    if not text:
+        return ""
+    text = text.lower()
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(c for c in text if unicodedata.category(c) != "Mn")
+    return text
+
+
+def resolve_service_by_destino(destino: str, db: Session):
+    destino_norm = normalize(destino)
+
+    services = db.query(Service).filter(Service.active == True).all()
+
+    # 1️⃣ match por slug
+    for service in services:
+        if normalize(service.slug) in destino_norm:
+            return service
+
+    # 2️⃣ match por nombre
+    for service in services:
+        if normalize(service.name) in destino_norm:
+            return service
+
+    # 3️⃣ fallback seguro (primer servicio activo)
+    if services:
+        return services[0]
+
+    return None
+
 @public_router.post("/form-submit", include_in_schema=False)
 def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
 
@@ -182,30 +214,23 @@ def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid API key")
 
     # ================================
-    # 📥 Datos
+    # 📥 Datos del Form
     # ================================
     pasajeros = int(payload.get("personas", 0))
     hora_ida = payload.get("hora_salida")
     hora_reg = payload.get("hora_regreso")
-    service_slug = payload.get("service_slug")
+    destino = payload.get("destino", "")
 
     if pasajeros <= 0:
         raise HTTPException(status_code=400, detail="Cantidad de pasajeros inválida")
 
-    if not service_slug:
-        raise HTTPException(status_code=400, detail="service_slug requerido")
-
     # ================================
-    # 🔎 Validar servicio
+    # 🔎 Resolver servicio automáticamente
     # ================================
-    service = (
-        db.query(Service)
-        .filter(Service.slug == service_slug, Service.active == True)
-        .first()
-    )
+    service = resolve_service_by_destino(destino, db)
 
     if not service:
-        raise HTTPException(status_code=400, detail="Servicio inválido o inactivo")
+        raise HTTPException(status_code=500, detail="No hay servicios configurados")
 
     # ================================
     # ⏱ Calcular duración
@@ -220,18 +245,18 @@ def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
         duracion = 0.0
 
     # ================================
-    # 💰 Motor de precios inteligente
+    # 💰 Pricing Engine
     # ================================
     engine = PricingEngine(db)
 
     subtotal, capacidad_asignada = engine.calculate(
-        service_slug=service_slug,
+        service_slug=service.slug,
         pasajeros=pasajeros,
         hora=hora_ida
     )
 
     if capacidad_asignada is None:
-        raise HTTPException(status_code=400, detail="No hay capacidades configuradas para este servicio")
+        raise HTTPException(status_code=400, detail="No hay capacidades configuradas")
 
     # ================================
     # 📝 Crear orden
@@ -241,11 +266,11 @@ def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
         nombre=payload.get("nombre"),
         fecha=payload.get("fecha"),
         dir_salida=payload.get("direccion_salida"),
-        dir_destino=payload.get("destino"),
+        dir_destino=destino,
         hor_ida=hora_ida,
         hor_regreso=hora_reg,
         duracion=duracion,
-        capacidadu=capacidad_asignada,  # 🔥 ya autoasignada
+        capacidadu=capacidad_asignada,
         subtotal=subtotal,
         descuento=0.0,
         total=subtotal,
@@ -260,8 +285,8 @@ def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
     return {
         "status": "ok",
         "order_id": order.id,
+        "service_resolved": service.slug,
         "capacidad_asignada": capacidad_asignada,
-        "duracion_horas": duracion,
         "precio_total": subtotal
     }
 
