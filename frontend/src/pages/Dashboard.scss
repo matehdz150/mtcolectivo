@@ -498,3 +498,79 @@
     }
   }
 }
+
+.orders-filters {
+
+  .filter {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8fafc;
+    border: 1px solid $color-border;
+    border-radius: 12px;
+    padding: 0.45rem 0.7rem;
+    transition: all 0.15s ease;
+
+    svg {
+      color: $color-muted;
+      flex-shrink: 0;
+    }
+
+    input,
+    select {
+      border: none;
+      background: transparent;
+      font-size: 0.85rem;
+      width: 100%;
+      color: $color-text;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &:focus-within {
+      background: #ffffff;
+      border-color: $color-brand-500;
+      box-shadow: 0 0 0 3px rgba($color-brand-500, 0.15);
+    }
+  }
+
+  .btn-sort {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(
+      135deg,
+      $color-brand-500,
+      $color-brand-600
+    );
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba($color-brand-600, 0.25);
+    }
+  }
+
+  .filters-row {
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .filters-row--primary {
+    justify-content: space-between;
+  }
+
+  .filters-row--secondary {
+    margin-top: 0.5rem;
+  }
+}
