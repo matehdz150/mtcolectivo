@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.routers import pdf, orders, auth
 from app.routers.orders import public_router, private_router
-from app.routers.services import price_router
+from app.routers.prices import price_router
 
 app = FastAPI(
     title="MT Colectivo API",
