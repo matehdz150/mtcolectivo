@@ -527,27 +527,22 @@ export default function Dashboard() {
                   onClick={() => openPreview(o)}
                 >
                   <div className="name">{o.nombre || "Sin nombre"}</div>
-                  <div className="sub">#{o.id}</div>
+                  <div className="meta">
+                    <span>#{o.id}</span>
+                    <span className="dot">•</span>
+                    <span>{fmtDate(o.created_at)}</span>
+                    <span className="dot">•</span>
+                    <span>
+                      {new Date(o.created_at).toLocaleTimeString("es-MX", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="cell cell--total">
                   <span className="money">{fmtMoney(o.total)}</span>
-                </div>
-
-                <div className="cell cell--fecha">{fmtDate(o.created_at)}</div>
-                <div className="cell cell--fecha">{fmtDate(o.created_at)}</div>
-
-                <div className="cell cell--hora">
-                  {new Date(o.created_at).toLocaleTimeString("es-MX", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </div>
-                <div className="cell cell--hora">
-                  {new Date(o.created_at).toLocaleTimeString("es-MX", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
                 </div>
 
                 <div className="cell cell--acciones">
@@ -556,28 +551,31 @@ export default function Dashboard() {
                     onClick={() => openPreview(o)}
                     aria-label="Vista previa"
                   >
-                    <EyeIcon size="1.1rem" />
+                    <EyeIcon size="1rem" />
                   </button>
+
                   <button
                     className="icon-chip"
                     onClick={() => downloadFromOrder(o)}
-                    aria-label="Descargar PDF"
+                    aria-label="Descargar"
                   >
-                    <DownloadIcon size="1.1rem" />
+                    <DownloadIcon size="1rem" />
                   </button>
+
                   <button
                     className="icon-chip"
                     onClick={() => openEditor(o)}
-                    aria-label="Editar orden"
+                    aria-label="Editar"
                   >
                     ✏️
                   </button>
+
                   <button
                     className="icon-chip danger"
                     onClick={() => removeOrder(o)}
-                    aria-label="Eliminar orden"
+                    aria-label="Eliminar"
                   >
-                    <TrashIcon size="1.1rem" />
+                    <TrashIcon size="1rem" />
                   </button>
                 </div>
               </div>
