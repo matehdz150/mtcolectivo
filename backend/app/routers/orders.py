@@ -1,11 +1,12 @@
 import re
 from fastapi import APIRouter, Depends, HTTPException, Response, Request
+from app.services.pricing_engine import PricingEngine
 from sqlalchemy.orm import Session
 from datetime import timezone
 import os
 
 from app.database import SessionLocal
-from app.models import Order
+from app.models import Order, Service
 from app.deps import get_current_user
 from app.schemas import User
 
@@ -145,57 +146,84 @@ def determine_cantaritos_price(capacidad: int, hora_salida: str) -> float:
 
 @public_router.post("/form-submit", include_in_schema=False)
 def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
-    print(payload)
-    # --- Seguridad con API KEY ---
+
+    # ================================
+    # 🔐 API KEY
+    # ================================
     api_key = request.headers.get("x-api-key")
     if api_key != FORM_API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API key")
 
-    # --- Lectura de datos del formulario ---
-    pasajeros_str = payload.get("personas", "0")
-    pasajeros = int(pasajeros_str)
+    # ================================
+    # 📥 Datos
+    # ================================
+    pasajeros = int(payload.get("personas", 0))
+    hora_ida = payload.get("hora_salida")
+    hora_reg = payload.get("hora_regreso")
+    service_slug = payload.get("service_slug")
 
-    hora_ida_raw = payload.get("hora_salida")
-    hora_reg_raw = payload.get("hora_regreso")
+    if pasajeros <= 0:
+        raise HTTPException(status_code=400, detail="Cantidad de pasajeros inválida")
 
-    # --- Duration ---
+    if not service_slug:
+        raise HTTPException(status_code=400, detail="service_slug requerido")
+
+    # ================================
+    # 🔎 Validar servicio
+    # ================================
+    service = (
+        db.query(Service)
+        .filter(Service.slug == service_slug, Service.active == True)
+        .first()
+    )
+
+    if not service:
+        raise HTTPException(status_code=400, detail="Servicio inválido o inactivo")
+
+    # ================================
+    # ⏱ Calcular duración
+    # ================================
     try:
-        t1 = parse_time(hora_ida_raw)
-        t2 = parse_time(hora_reg_raw)
-        duracion = (t2 - t1).total_seconds() / 3600  # horas
+        t1 = datetime.strptime(hora_ida, "%H:%M")
+        t2 = datetime.strptime(hora_reg, "%H:%M")
+        duracion = (t2 - t1).total_seconds() / 3600
         if duracion < 0:
-            duracion += 24  # viaje cruza medianoche
+            duracion += 24
     except:
         duracion = 0.0
 
-    # --- Capacidad asignada ---
-    capacidadu = assign_capacidad(pasajeros)
+    # ================================
+    # 💰 Motor de precios inteligente
+    # ================================
+    engine = PricingEngine(db)
 
-    # --- Precio total según capacidad ---
-    destino = payload.get("destino", "").lower()
-    if is_cantaritos(destino):
-        total = determine_cantaritos_price(capacidadu, payload.get("hora_salida"))
-    else:
-        total = PRICE_TABLE.get(capacidadu, 0.0)
+    subtotal, capacidad_asignada = engine.calculate(
+        service_slug=service_slug,
+        pasajeros=pasajeros,
+        hora=hora_ida
+    )
 
-    # --- Crear orden ---
+    if capacidad_asignada is None:
+        raise HTTPException(status_code=400, detail="No hay capacidades configuradas para este servicio")
+
+    # ================================
+    # 📝 Crear orden
+    # ================================
     order = Order(
+        service_id=service.id,
         nombre=payload.get("nombre"),
         fecha=payload.get("fecha"),
         dir_salida=payload.get("direccion_salida"),
         dir_destino=payload.get("destino"),
-        hor_ida=payload.get("hora_salida"),
-        hor_regreso=payload.get("hora_regreso"),
-
+        hor_ida=hora_ida,
+        hor_regreso=hora_reg,
         duracion=duracion,
-        capacidadu=capacidadu,
-
-        subtotal=total,
+        capacidadu=capacidad_asignada,  # 🔥 ya autoasignada
+        subtotal=subtotal,
         descuento=0.0,
-        total=total,           # Precio asignado
+        total=subtotal,
         abonado=0.0,
-        fecha_abono=None,
-        liquidar=total,
+        liquidar=subtotal
     )
 
     db.add(order)
@@ -204,11 +232,10 @@ def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
 
     return {
         "status": "ok",
-        "hora ida": hora_ida_raw,
         "order_id": order.id,
-        "capacidad_asignada": capacidadu,
+        "capacidad_asignada": capacidad_asignada,
         "duracion_horas": duracion,
-        "precio_total": total
+        "precio_total": subtotal
     }
 
 
@@ -360,16 +387,19 @@ def update_order(order_id: int, payload: dict, db: Session = Depends(get_db)):
     if "subtotal" in payload:
         order.subtotal = float(payload["subtotal"])
     else:
-        # Solo recalcular si NO viene manual
-        destino = (order.dir_destino or "").lower()
+        engine = PricingEngine(db)
+        service = db.get(Service, order.service_id)
 
-        if is_cantaritos(destino):
-            order.subtotal = determine_cantaritos_price(
-                order.capacidadu,
-                order.hor_ida
+        if service:
+            subtotal, capacidad_asignada = engine.calculate(
+                service_slug=service.slug,
+                pasajeros=order.capacidadu,
+                hora=order.hor_ida
             )
+            order.capacidadu = capacidad_asignada
+            order.subtotal = subtotal
         else:
-            order.subtotal = PRICE_TABLE.get(order.capacidadu, 0.0)
+            order.subtotal = 0
 
     # ================================
     # Descuento editable
