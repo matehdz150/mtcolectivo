@@ -4,7 +4,7 @@
 .dashboard {
   display: grid;
   grid-template-columns: 16rem 1fr; // sidebar + contenido
-  min-height: 100vh;
+  min-height: 150vh;
   background: $color-bg;
 
   @include respond(md) {
