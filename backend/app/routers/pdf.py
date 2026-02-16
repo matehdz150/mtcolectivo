@@ -182,3 +182,81 @@ async def pdf_from_data(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+from docx import Document
+from io import BytesIO
+
+def generate_docx_from_template(mapping: dict) -> bytes:
+    doc = Document("app/templates/template.docx")
+
+    for paragraph in doc.paragraphs:
+        for key, value in mapping.items():
+            if key in paragraph.text:
+                paragraph.text = paragraph.text.replace(key, value)
+
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for key, value in mapping.items():
+                    if key in cell.text:
+                        cell.text = cell.text.replace(key, value)
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer.read()
+    
+@router.post("/from-data-word")
+async def word_from_data(
+    data: Dict[str, Any],
+    current_user: User = Depends(get_current_user),
+):
+    try:
+        def g(d: Dict[str, Any], k: str) -> str:
+            for cand in (k, k.lower(), k.upper()):
+                if cand in d:
+                    v = d[cand]
+                    return "" if v is None else str(v)
+            return ""
+
+        # ========= Leer valores =========
+        s_subtotal  = g(data, "subtotal")
+        s_descuento = g(data, "descuento")
+        s_abonado   = g(data, "abonado")
+
+        subtotal  = parse_num(s_subtotal)
+        descuento = parse_num(s_descuento)
+        abonado   = parse_num(s_abonado)
+
+        total    = subtotal - descuento
+        liquidar = total - abonado
+
+        mapping = {
+            "&NOMBRE&": g(data, "nombre"),
+            "&FECHA&": g(data, "fecha"),
+            "&DIR_SALIDA&": g(data, "dir_salida"),
+            "&DIR_DESTINO&": g(data, "dir_destino"),
+            "&HOR_IDA&": g(data, "hor_ida"),
+            "&HOR_REGRESO&": g(data, "hor_regreso"),
+            "&DURACION&": g(data, "duracion"),
+            "&CAPACIDADU&": g(data, "capacidadu"),
+            "&SUBTOTAL&": f"{subtotal:.2f}",
+            "&DESCUENTO&": f"{descuento:.2f}",
+            "&TOTAL&": f"{total:.2f}",
+            "&ABONADO&": f"{abonado:.2f}",
+            "&FECHA_ABONO&": g(data, "fecha_abono"),
+            "&LIQUIDAR&": f"{liquidar:.2f}",
+        }
+
+        docx_bytes = generate_docx_from_template(mapping)
+
+        return StreamingResponse(
+            BytesIO(docx_bytes),
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={
+                "Content-Disposition": 'attachment; filename="orden.docx"'
+            },
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

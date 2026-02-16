@@ -71,3 +71,17 @@ export async function updateOrder(
 
   return res.json();
 }
+
+export async function wordFromData(
+  order: Order,
+  signal?: AbortSignal
+): Promise<Blob> {
+  const res = await authFetch(`${API_BASE}/pdf/from-data-word`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(order),
+    signal,
+  });
+
+  return await res.blob();
+}

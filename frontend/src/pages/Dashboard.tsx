@@ -12,6 +12,7 @@ import {
   OrderUpdatePayload,
   pdfFromData,
   updateOrder,
+  wordFromData,
   type Order,
 } from "../services/orders";
 import "./Dashboard.scss";
@@ -210,23 +211,50 @@ export default function Dashboard() {
 
   const downloadFromOrder = async (order: Order) => {
     if (!isAuth) return;
+
     const ac = new AbortController();
+
     setModalStatus("loading");
-    setModalTitle("Generando PDF…");
-    setModalMsg("Un momento por favor.");
+    setModalTitle("Generando archivos…");
+    setModalMsg("Estamos preparando tu PDF y Word.");
     setModalOpen(true);
+
     try {
-      const pdf = await pdfFromData(order, ac.signal);
-      const url = URL.createObjectURL(pdf);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `orden_${order.id}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
+      // ========================
+      // 1️⃣ Descargar PDF
+      // ========================
+      const pdfBlob = await pdfFromData(order, ac.signal);
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+
+      const pdfLink = document.createElement("a");
+      pdfLink.href = pdfUrl;
+      pdfLink.download = `orden_${order.id}.pdf`;
+      document.body.appendChild(pdfLink);
+      pdfLink.click();
+      document.body.removeChild(pdfLink);
+      URL.revokeObjectURL(pdfUrl);
+
+      // ========================
+      // 2️⃣ Descargar Word
+      // ========================
+      const wordBlob = await wordFromData(order, ac.signal);
+      const wordUrl = URL.createObjectURL(wordBlob);
+
+      const wordLink = document.createElement("a");
+      wordLink.href = wordUrl;
+      wordLink.download = `orden_${order.id}.docx`;
+      document.body.appendChild(wordLink);
+      wordLink.click();
+      document.body.removeChild(wordLink);
+      URL.revokeObjectURL(wordUrl);
+
+      // ========================
+      // Final UI
+      // ========================
       setModalStatus("done");
       setModalTitle("¡Listo!");
-      setModalMsg("Tu PDF se descargó correctamente.");
-      setTimeout(() => setModalOpen(false), 1000);
+      setModalMsg("Se descargaron el PDF y el Word correctamente.");
+      setTimeout(() => setModalOpen(false), 1200);
     } catch (e: any) {
       setModalStatus("error");
       setModalTitle(
