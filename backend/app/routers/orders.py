@@ -145,11 +145,31 @@ def determine_cantaritos_price(capacidad: int, hora_salida: str) -> float:
 
 @public_router.get("/fix-db")
 def fix_db(db: Session = Depends(get_db)):
+
+    # 1️⃣ Agregar columna si no existe
     db.execute("""
         ALTER TABLE orders
         ADD COLUMN IF NOT EXISTS service_id INTEGER;
     """)
+
+    # 2️⃣ Agregar foreign key si no existe
+    db.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1
+                FROM information_schema.table_constraints
+                WHERE constraint_name = 'fk_orders_service'
+            ) THEN
+                ALTER TABLE orders
+                ADD CONSTRAINT fk_orders_service
+                FOREIGN KEY (service_id) REFERENCES services(id);
+            END IF;
+        END$$;
+    """)
+
     db.commit()
+
     return {"status": "ok"}
 
 
