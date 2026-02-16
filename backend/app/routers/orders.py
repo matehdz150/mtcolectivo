@@ -4,6 +4,7 @@ from app.services.pricing_engine import PricingEngine
 from sqlalchemy.orm import Session
 from datetime import timezone
 import os
+from sqlalchemy import text
 
 from app.database import SessionLocal
 from app.models import Order, Service
@@ -146,14 +147,12 @@ def determine_cantaritos_price(capacidad: int, hora_salida: str) -> float:
 @public_router.get("/fix-db")
 def fix_db(db: Session = Depends(get_db)):
 
-    # 1️⃣ Agregar columna si no existe
-    db.execute("""
+    db.execute(text("""
         ALTER TABLE orders
         ADD COLUMN IF NOT EXISTS service_id INTEGER;
-    """)
+    """))
 
-    # 2️⃣ Agregar foreign key si no existe
-    db.execute("""
+    db.execute(text("""
         DO $$
         BEGIN
             IF NOT EXISTS (
@@ -166,12 +165,11 @@ def fix_db(db: Session = Depends(get_db)):
                 FOREIGN KEY (service_id) REFERENCES services(id);
             END IF;
         END$$;
-    """)
+    """))
 
     db.commit()
 
     return {"status": "ok"}
-
 
 @public_router.post("/form-submit", include_in_schema=False)
 def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
