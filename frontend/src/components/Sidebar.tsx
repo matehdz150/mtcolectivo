@@ -7,7 +7,8 @@ import {
   X,
   LayoutDashboard,
   LogOut,
-  BarChart3
+  BarChart3,
+  HandCoins
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -61,7 +62,18 @@ export default function Sidebar() {
             }
           >
             <LayoutDashboard size={16} />
-            Dashboard
+            Ordenes
+          </NavLink>
+
+          <NavLink
+            to="/prices"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <HandCoins size={16} />
+            Precios
           </NavLink>
 
           {/* 🆕 ESTADÍSTICAS */}

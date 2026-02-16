@@ -6,21 +6,218 @@ from app.database import SessionLocal
 from app.models import Service, ServicePrice
 
 SERVICES_DATA = [
-    {
-        "name": "Cantaritos",
-        "slug": "cantaritos",
-        "prices": [
-            {"capacidad": 6, "period": "morning", "price_normal": 2500},
-            {"capacidad": 14, "period": "morning", "price_normal": 5000},
-            {"capacidad": 20, "period": "morning", "price_normal": 6000},
-            {"capacidad": 45, "period": "morning", "price_normal": 9500},
+    SERVICES_DATA = [
 
-            {"capacidad": 6, "period": "afternoon", "price_normal": 3000},
-            {"capacidad": 14, "period": "afternoon", "price_normal": 5500},
-            {"capacidad": 20, "period": "afternoon", "price_normal": 6500},
-            {"capacidad": 45, "period": "afternoon", "price_normal": 10000},
+    # ================================
+    # MAZATLÁN
+    # ================================
+    {
+        "name": "Mazatlán",
+        "slug": "mazatlan",
+        "prices": [
+            # 6 pax
+            {"capacidad": 6, "period": "weekend", "price_normal": 12500},
+            {"capacidad": 6, "period": "long_weekend", "price_normal": 13500},
+
+            # 14 pax
+            {"capacidad": 14, "period": "weekend", "price_normal": 17500},
+            {"capacidad": 14, "period": "long_weekend", "price_normal": 18000},
+
+            # 20 pax
+            {"capacidad": 20, "period": "weekend", "price_normal": 20500},
+            {"capacidad": 20, "period": "long_weekend", "price_normal": 21500},
         ]
-    }
+    },
+
+    # ================================
+    # PTO VALLARTA
+    # ================================
+    {
+        "name": "Puerto Vallarta",
+        "slug": "pto-vallarta",
+        "prices": [
+            {"capacidad": 6, "period": "same_day", "price_normal": 9500},
+            {"capacidad": 6, "period": "weekend", "price_normal": 10500},
+            {"capacidad": 6, "period": "long_weekend", "price_normal": 11500},
+
+            {"capacidad": 14, "period": "same_day", "price_normal": 12500},
+            {"capacidad": 14, "period": "weekend", "price_normal": 13500},
+            {"capacidad": 14, "period": "long_weekend", "price_normal": 14500},
+
+            {"capacidad": 20, "period": "same_day", "price_normal": 14000},
+            {"capacidad": 20, "period": "weekend", "price_normal": 15000},
+            {"capacidad": 20, "period": "long_weekend", "price_normal": 16000},
+        ]
+    },
+
+    # ================================
+    # MANZANILLO
+    # ================================
+    {
+        "name": "Manzanillo",
+        "slug": "manzanillo",
+        "prices": [
+            {"capacidad": 6, "period": "same_day", "price_normal": 8500},
+            {"capacidad": 6, "period": "weekend", "price_normal": 9500},
+            {"capacidad": 6, "period": "long_weekend", "price_normal": 10500},
+
+            {"capacidad": 14, "period": "same_day", "price_normal": 11500},
+            {"capacidad": 14, "period": "weekend", "price_normal": 12500},
+            {"capacidad": 14, "period": "long_weekend", "price_normal": 13500},
+
+            {"capacidad": 20, "period": "same_day", "price_normal": 13000},
+            {"capacidad": 20, "period": "weekend", "price_normal": 14000},
+            {"capacidad": 20, "period": "long_weekend", "price_normal": 14500},
+        ]
+    },
+
+    # ================================
+    # GUANAJUATO
+    # ================================
+    {
+        "name": "Guanajuato",
+        "slug": "guanajuato",
+        "prices": [
+            {"capacidad": 6, "period": "same_day", "price_normal": 8500},
+            {"capacidad": 6, "period": "weekend", "price_normal": 9500},
+            {"capacidad": 6, "period": "long_weekend", "price_normal": 10500},
+
+            {"capacidad": 14, "period": "same_day", "price_normal": 11500},
+            {"capacidad": 14, "period": "weekend", "price_normal": 12500},
+            {"capacidad": 14, "period": "long_weekend", "price_normal": 13500},
+
+            {"capacidad": 20, "period": "same_day", "price_normal": 13000},
+            {"capacidad": 20, "period": "weekend", "price_normal": 14000},
+            {"capacidad": 20, "period": "long_weekend", "price_normal": 15000},
+        ]
+    },
+
+    # ================================
+    # MORELIA
+    # ================================
+    {
+        "name": "Morelia",
+        "slug": "morelia",
+        "prices": [
+            {"capacidad": 6, "period": "same_day", "price_normal": 8500},
+            {"capacidad": 6, "period": "weekend", "price_normal": 9500},
+            {"capacidad": 6, "period": "long_weekend", "price_normal": 10500},
+
+            {"capacidad": 14, "period": "same_day", "price_normal": 11500},
+            {"capacidad": 14, "period": "weekend", "price_normal": 12500},
+            {"capacidad": 14, "period": "long_weekend", "price_normal": 13500},
+
+            {"capacidad": 20, "period": "same_day", "price_normal": 13000},
+            {"capacidad": 20, "period": "weekend", "price_normal": 14000},
+            {"capacidad": 20, "period": "long_weekend", "price_normal": 15000},
+        ]
+    },
+
+    # ================================
+    # TEPIC
+    # ================================
+    {
+        "name": "Tepic",
+        "slug": "tepic",
+        "prices": [
+            {"capacidad": 6, "period": "same_day", "price_normal": 8000},
+            {"capacidad": 6, "period": "weekend", "price_normal": 9000},
+            {"capacidad": 6, "period": "long_weekend", "price_normal": 10000},
+
+            {"capacidad": 14, "period": "same_day", "price_normal": 10500},
+            {"capacidad": 14, "period": "weekend", "price_normal": 11500},
+            {"capacidad": 14, "period": "long_weekend", "price_normal": 12500},
+
+            {"capacidad": 20, "period": "same_day", "price_normal": 12000},
+            {"capacidad": 20, "period": "weekend", "price_normal": 13000},
+            {"capacidad": 20, "period": "long_weekend", "price_normal": 14000},
+        ]
+    },
+
+    # ================================
+    # TAPALPA
+    # ================================
+    {
+        "name": "Tapalpa",
+        "slug": "tapalpa",
+        "prices": [
+            {"capacidad": 6, "period": "same_day", "price_normal": 5000},
+            {"capacidad": 6, "period": "weekend", "price_normal": 6500},
+            {"capacidad": 6, "period": "long_weekend", "price_normal": 7500},
+
+            {"capacidad": 14, "period": "same_day", "price_normal": 7500},
+            {"capacidad": 14, "period": "weekend", "price_normal": 8500},
+            {"capacidad": 14, "period": "long_weekend", "price_normal": 9500},
+
+            {"capacidad": 20, "period": "same_day", "price_normal": 9000},
+            {"capacidad": 20, "period": "weekend", "price_normal": 10000},
+            {"capacidad": 20, "period": "long_weekend", "price_normal": 11000},
+        ]
+    },
+
+    # ================================
+    # MAZAMITLA
+    # ================================
+    {
+        "name": "Mazamita",
+        "slug": "mazamitla",
+        "prices": [
+            {"capacidad": 6, "period": "same_day", "price_normal": 5000},
+            {"capacidad": 6, "period": "weekend", "price_normal": 6500},
+            {"capacidad": 6, "period": "long_weekend", "price_normal": 7500},
+
+            {"capacidad": 14, "period": "same_day", "price_normal": 7500},
+            {"capacidad": 14, "period": "weekend", "price_normal": 8500},
+            {"capacidad": 14, "period": "long_weekend", "price_normal": 9500},
+
+            {"capacidad": 20, "period": "same_day", "price_normal": 9000},
+            {"capacidad": 20, "period": "weekend", "price_normal": 10000},
+            {"capacidad": 20, "period": "long_weekend", "price_normal": 11000},
+        ]
+    },
+
+    # ================================
+    # CHAPALA
+    # ================================
+    {
+        "name": "Chapala",
+        "slug": "chapala",
+        "prices": [
+            {"capacidad": 6, "period": "same_day", "price_normal": 3000},
+            {"capacidad": 6, "period": "weekend", "price_normal": 3500},
+            {"capacidad": 6, "period": "long_weekend", "price_normal": 4000},
+
+            {"capacidad": 14, "period": "same_day", "price_normal": 5500},
+            {"capacidad": 14, "period": "weekend", "price_normal": 6000},
+            {"capacidad": 14, "period": "long_weekend", "price_normal": 6500},
+
+            {"capacidad": 20, "period": "same_day", "price_normal": 6500},
+            {"capacidad": 20, "period": "weekend", "price_normal": 7000},
+            {"capacidad": 20, "period": "long_weekend", "price_normal": 7500},
+        ]
+    },
+
+    # ================================
+    # TEQUILA
+    # ================================
+    {
+        "name": "Tequila",
+        "slug": "tequila",
+        "prices": [
+            {"capacidad": 6, "period": "same_day", "price_normal": 3000},
+            {"capacidad": 6, "period": "weekend", "price_normal": 3500},
+            {"capacidad": 6, "period": "long_weekend", "price_normal": 4000},
+
+            {"capacidad": 14, "period": "same_day", "price_normal": 5500},
+            {"capacidad": 14, "period": "weekend", "price_normal": 6000},
+            {"capacidad": 14, "period": "long_weekend", "price_normal": 6500},
+
+            {"capacidad": 20, "period": "same_day", "price_normal": 6500},
+            {"capacidad": 20, "period": "weekend", "price_normal": 7000},
+            {"capacidad": 20, "period": "long_weekend", "price_normal": 7500},
+        ]
+    },
+]
 ]
 
 def run():

@@ -30,6 +30,17 @@ def get_db():
     finally:
         db.close()
 
+@price_router.post("/services")
+def create_service(payload: dict, db: Session = Depends(get_db)):
+    service = Service(
+        name=payload["name"],
+        slug=payload["slug"],
+        active=True
+    )
+    db.add(service)
+    db.commit()
+    db.refresh(service)
+    return service
         
 
 @price_router.post("")
