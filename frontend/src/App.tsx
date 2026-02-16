@@ -12,7 +12,6 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/ok" element={<Navigate to="/video" replace />} />
           <Route path="/login" element={<Login />} />
 
           {/* Rutas protegidas */}
