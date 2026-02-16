@@ -6,7 +6,6 @@ from app.database import SessionLocal
 from app.models import Service, ServicePrice
 
 SERVICES_DATA = [
-    SERVICES_DATA = [
 
     # ================================
     # MAZATLÁN
@@ -217,7 +216,6 @@ SERVICES_DATA = [
             {"capacidad": 20, "period": "long_weekend", "price_normal": 7500},
         ]
     },
-]
 ]
 
 def run():
