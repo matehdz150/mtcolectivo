@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import { fetchStats } from "../services/orders";
 import "./Stats.scss";
+import Sidebar from "../components/Sidebar";
 
 type StatsData = {
   finanzas: any;
@@ -50,6 +51,7 @@ export default function Stats() {
 
   return (
     <div className="stats-page">
+        <Sidebar/>
 
       <h2>Estadísticas generales</h2>
 
