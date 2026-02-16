@@ -252,7 +252,7 @@ def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
     subtotal, capacidad_asignada = engine.calculate(
         service_slug=service.slug,
         pasajeros=pasajeros,
-        hora=hora_ida
+        duracion_horas=duracion
     )
 
     if capacidad_asignada is None:
