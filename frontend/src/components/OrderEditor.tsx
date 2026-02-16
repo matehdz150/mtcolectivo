@@ -1,50 +1,57 @@
-import { useState } from "react";
-import { authFetch, API_BASE } from "../services/api";
+import { Order, OrderUpdatePayload } from "@/services/orders";
+import { useEffect, useState } from "react";
 
-export default function OrderEditor({ open, order, onClose, onSaved }) {
-    if (!order) return null;
-  const [form, setForm] = useState(order);
+type OrderEditorProps = {
+  open: boolean;
+  order: Order | null;
+  onClose: () => void;
+  onSaved: (payload: OrderUpdatePayload) => Promise<void>;
+};
 
-  if (!open) return null;
+export default function OrderEditor({
+  open,
+  order,
+  onClose,
+  onSaved,
+}: OrderEditorProps) {
+  const [form, setForm] = useState<Order>(order as Order);
 
-  function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  useEffect(() => {
+    if (order) {
+      setForm(order);
+    }
+  }, [order]);
+
+  if (!open || !order) return null;
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target;
+
+    setForm(
+      (prev) =>
+        ({
+          ...prev,
+          [name]: value,
+        }) as Order,
+    );
   }
 
   async function saveChanges() {
-    await authFetch(`${API_BASE}/orders/${order.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    const payload = {
+      nombre: form.nombre ?? undefined,
+      fecha: form.fecha ?? undefined,
+      direccion_salida: form.dir_salida ?? undefined,
+      destino: form.dir_destino ?? undefined,
+      hora_salida: form.hor_ida ?? undefined,
+      hora_regreso: form.hor_regreso ?? undefined,
+    };
 
-    onSaved();
-    onClose();
-  }
-
-  async function toggleDiscount() {
-    await authFetch(`${API_BASE}/orders/${order.id}/toggle-discount`, {
-      method: "POST",
-    });
-    onSaved();
-  }
-
-  async function addPayment() {
-    const amt = parseFloat(prompt("¿Monto a abonar?"));
-    if (!amt || amt <= 0) return;
-
-    await authFetch(
-      `${API_BASE}/orders/${order.id}/add-payment?amount=${amt}`,
-      { method: "POST" }
-    );
-
-    onSaved();
+    await onSaved(payload);
   }
 
   return (
     <div className="modal-overlay">
       <div className="modal-body">
-
         <h2>Editar orden #{order.id}</h2>
 
         <label>Cliente</label>
@@ -55,11 +62,7 @@ export default function OrderEditor({ open, order, onClose, onSaved }) {
         />
 
         <label>Fecha</label>
-        <input
-          name="fecha"
-          value={form.fecha ?? ""}
-          onChange={handleChange}
-        />
+        <input name="fecha" value={form.fecha ?? ""} onChange={handleChange} />
 
         <label>Dirección salida</label>
         <input
@@ -90,14 +93,6 @@ export default function OrderEditor({ open, order, onClose, onSaved }) {
         />
 
         <div className="actions">
-          <button onClick={toggleDiscount}>
-            {order.descuento > 0 ? "Quitar descuento" : "Aplicar descuento"}
-          </button>
-
-          <button onClick={addPayment}>
-            Agregar abono
-          </button>
-
           <button className="btn-primary" onClick={saveChanges}>
             Guardar cambios
           </button>

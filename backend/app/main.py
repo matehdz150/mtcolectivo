@@ -43,7 +43,10 @@ app.include_router(orders.private_router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # en producción puedes limitar esto
+    allow_origins=[
+        "https://mtcolectivo.vercel.app",
+        "http://localhost:3000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

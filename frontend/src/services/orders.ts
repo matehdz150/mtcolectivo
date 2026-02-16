@@ -38,3 +38,30 @@ export async function pdfFromData(order: Order, signal?: AbortSignal): Promise<B
 export async function deleteOrder(id: number, signal?: AbortSignal): Promise<void> {
   await authFetch(`${API_BASE}/orders/${id}`, { method: "DELETE", signal });
 }
+
+export type OrderUpdatePayload = {
+  nombre?: string;
+  fecha?: string;
+  direccion_salida?: string;
+  destino?: string;
+  hora_salida?: string;
+  hora_regreso?: string;
+  personas?: number;
+};
+
+export async function updateOrder(
+  id: number,
+  payload: OrderUpdatePayload,
+  signal?: AbortSignal
+): Promise<Order> {
+  const res = await authFetch(`${API_BASE}/orders/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+    signal,
+  });
+
+  return res.json();
+}

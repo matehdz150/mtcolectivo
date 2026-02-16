@@ -9,7 +9,9 @@ import OrderEditor from "../components/OrderEditor";
 import {
   deleteOrder,
   fetchOrders,
+  OrderUpdatePayload,
   pdfFromData,
+  updateOrder,
   type Order,
 } from "../services/orders";
 import "./Dashboard.scss";
@@ -32,7 +34,7 @@ export default function Dashboard() {
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const [editorOpen, setEditorOpen] = useState(false);
-  const [editingOrder, setEditingOrder] = useState(null);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
 
   // Abre el modal de edición
   function openEditor(order: any) {
@@ -56,7 +58,7 @@ export default function Dashboard() {
   const [modalStatus, setModalStatus] = useState<ModalStatus>("loading");
   const [modalTitle, setModalTitle] = useState("Procesando…");
   const [modalMsg, setModalMsg] = useState(
-    "Estamos generando tu PDF. Esto puede tardar unos segundos."
+    "Estamos generando tu PDF. Esto puede tardar unos segundos.",
   );
 
   const [uploadPdfUrl, setUploadPdfUrl] = useState<string | null>(null);
@@ -166,7 +168,7 @@ export default function Dashboard() {
       setMessage(msg);
       setModalStatus("error");
       setModalTitle(
-        apiErr?.status === 401 ? "Sesión expirada" : "Ocurrió un problema"
+        apiErr?.status === 401 ? "Sesión expirada" : "Ocurrió un problema",
       );
       setModalMsg(msg);
     } finally {
@@ -195,12 +197,12 @@ export default function Dashboard() {
       setModalTitle(
         e?.status === 401
           ? "Sesión expirada"
-          : "No se pudo abrir la vista previa"
+          : "No se pudo abrir la vista previa",
       );
       setModalMsg(
         e?.status === 401
           ? "Vuelve a iniciar sesión."
-          : e?.message || "Error desconocido"
+          : e?.message || "Error desconocido",
       );
       setModalOpen(true);
     }
@@ -228,12 +230,12 @@ export default function Dashboard() {
     } catch (e: any) {
       setModalStatus("error");
       setModalTitle(
-        e?.status === 401 ? "Sesión expirada" : "No se pudo descargar"
+        e?.status === 401 ? "Sesión expirada" : "No se pudo descargar",
       );
       setModalMsg(
         e?.status === 401
           ? "Vuelve a iniciar sesión."
-          : e?.message || "Error desconocido"
+          : e?.message || "Error desconocido",
       );
     }
   };
@@ -248,12 +250,12 @@ export default function Dashboard() {
     } catch (e: any) {
       setModalStatus("error");
       setModalTitle(
-        e?.status === 401 ? "Sesión expirada" : "No se pudo eliminar"
+        e?.status === 401 ? "Sesión expirada" : "No se pudo eliminar",
       );
       setModalMsg(
         e?.status === 401
           ? "Vuelve a iniciar sesión."
-          : e?.message || "Error desconocido"
+          : e?.message || "Error desconocido",
       );
       setModalOpen(true);
     }
@@ -538,6 +540,13 @@ export default function Dashboard() {
                     <DownloadIcon size="1.1rem" />
                   </button>
                   <button
+                    className="icon-chip"
+                    onClick={() => openEditor(o)}
+                    aria-label="Editar orden"
+                  >
+                    ✏️
+                  </button>
+                  <button
                     className="icon-chip danger"
                     onClick={() => removeOrder(o)}
                     aria-label="Eliminar orden"
@@ -555,8 +564,16 @@ export default function Dashboard() {
         <OrderEditor
           open={editorOpen}
           order={editingOrder}
-          onClose={() => setEditorOpen(false)}
-          onSaved={loadOrders} // 👈 seguro querías loadOrders, no loadingOrders
+          onClose={closeEditor}
+          onSaved={async (updatedData: OrderUpdatePayload) => {
+            try {
+              await updateOrder(editingOrder.id, updatedData);
+              await loadOrders();
+              closeEditor();
+            } catch (err) {
+              console.error("Error actualizando orden:", err);
+            }
+          }}
         />
       )}
 
