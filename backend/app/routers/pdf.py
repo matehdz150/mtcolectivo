@@ -132,7 +132,7 @@ async def pdf_from_excel(
 @router.post("/from-data")
 async def pdf_from_data(
     data: Dict[str, Any],
-    current_user: User = Depends(get_current_user),  # ✅ protegido
+    current_user: User = Depends(get_current_user),
 ):
     try:
         def g(d: Dict[str, Any], k: str) -> str:
