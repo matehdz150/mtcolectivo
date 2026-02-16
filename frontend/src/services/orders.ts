@@ -46,7 +46,13 @@ export type OrderUpdatePayload = {
   destino?: string;
   hora_salida?: string;
   hora_regreso?: string;
-  personas?: number;
+
+  personas?: number;      // recalcula capacidad automática
+  capacidadu?: number;    // override manual
+
+  subtotal?: number;      // precio manual
+  descuento?: number;     // descuento manual
+  abonado?: number;       // pago manual
 };
 
 export async function updateOrder(

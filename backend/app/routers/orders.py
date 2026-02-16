@@ -323,7 +323,7 @@ def update_order(order_id: int, payload: dict, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order not found")
 
     # ================================
-    # Actualizar campos editables
+    # Actualizar campos básicos
     # ================================
     order.nombre = payload.get("nombre", order.nombre)
     order.fecha = payload.get("fecha", order.fecha)
@@ -332,42 +332,62 @@ def update_order(order_id: int, payload: dict, db: Session = Depends(get_db)):
     order.hor_ida = payload.get("hora_salida", order.hor_ida)
     order.hor_regreso = payload.get("hora_regreso", order.hor_regreso)
 
-    pasajeros = int(payload.get("personas", order.capacidadu or 0))
-
     # ================================
-    # Recalcular duración
+    # Recalcular duración (si cambian horas)
     # ================================
     try:
-        t1 = parse_time(order.hor_ida)
-        t2 = parse_time(order.hor_regreso)
-        duracion = (t2 - t1).total_seconds() / 3600
-        if duracion < 0:
-            duracion += 24
-        order.duracion = duracion
+        if order.hor_ida and order.hor_regreso:
+            t1 = parse_time(order.hor_ida)
+            t2 = parse_time(order.hor_regreso)
+            duracion = (t2 - t1).total_seconds() / 3600
+            if duracion < 0:
+                duracion += 24
+            order.duracion = duracion
     except:
         pass
 
     # ================================
-    # Recalcular capacidad
+    # Capacidad (editable también)
     # ================================
-    capacidadu = assign_capacidad(pasajeros)
-    order.capacidadu = capacidadu
+    if "capacidadu" in payload:
+        order.capacidadu = int(payload["capacidadu"])
+    elif "personas" in payload:
+        order.capacidadu = assign_capacidad(int(payload["personas"]))
 
     # ================================
-    # Recalcular precio
+    # SUBTOTAL editable
     # ================================
-    destino = (order.dir_destino or "").lower()
-
-    if is_cantaritos(destino):
-        subtotal = determine_cantaritos_price(capacidadu, order.hor_ida)
+    if "subtotal" in payload:
+        order.subtotal = float(payload["subtotal"])
     else:
-        subtotal = PRICE_TABLE.get(capacidadu, 0.0)
+        # Solo recalcular si NO viene manual
+        destino = (order.dir_destino or "").lower()
 
-    order.subtotal = subtotal
+        if is_cantaritos(destino):
+            order.subtotal = determine_cantaritos_price(
+                order.capacidadu,
+                order.hor_ida
+            )
+        else:
+            order.subtotal = PRICE_TABLE.get(order.capacidadu, 0.0)
 
-    # Mantener descuento si ya existía
-    order.total = order.subtotal - order.descuento
-    order.liquidar = order.total - order.abonado
+    # ================================
+    # Descuento editable
+    # ================================
+    if "descuento" in payload:
+        order.descuento = float(payload["descuento"])
+
+    # ================================
+    # Abonado editable
+    # ================================
+    if "abonado" in payload:
+        order.abonado = float(payload["abonado"])
+
+    # ================================
+    # Recalcular totales SIEMPRE
+    # ================================
+    order.total = (order.subtotal or 0) - (order.descuento or 0)
+    order.liquidar = order.total - (order.abonado or 0)
 
     db.commit()
     db.refresh(order)
