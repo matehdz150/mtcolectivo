@@ -30,6 +30,8 @@ def get_db():
     finally:
         db.close()
 
+        
+
 @price_router.post("")
 def create_price(payload: dict, db: Session = Depends(get_db)):
 
@@ -50,6 +52,11 @@ def create_price(payload: dict, db: Session = Depends(get_db)):
     db.refresh(price)
 
     return price
+
+@price_router.get("/services")
+def list_services(db: Session = Depends(get_db)):
+    services = db.query(Service).order_by(Service.name.asc()).all()
+    return services
 
 @price_router.get("")
 def list_prices(service_id: int, db: Session = Depends(get_db)):
@@ -90,8 +97,3 @@ def delete_price(price_id: int, db: Session = Depends(get_db)):
     return {"status": "deleted"}
 
 # services_router.py o en el mismo archivo
-
-@price_router.get("/services")
-def list_services(db: Session = Depends(get_db)):
-    services = db.query(Service).order_by(Service.name.asc()).all()
-    return services
