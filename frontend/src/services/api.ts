@@ -12,19 +12,32 @@ export class ApiError extends Error {
   }
 }
 
-import { getToken } from "./auth";
+import { getToken, clearToken } from "./auth";
 
 export async function authFetch(input: RequestInfo, init: RequestInit = {}) {
   const token = getToken();
   const headers = new Headers(init.headers || {});
+
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
   const res = await fetch(input, { ...init, headers });
+
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    if (res.status === 401) throw new ApiError("No autorizado", 401, body);
+
+    if (res.status === 401) {
+      // 🔥 Limpia sesión
+      clearToken();
+
+      // 🔥 Redirige al login
+      window.location.href = "/login";
+
+      throw new ApiError("No autorizado", 401, body);
+    }
+
     throw new ApiError(body || `HTTP ${res.status}`, res.status, body);
   }
+
   return res;
 }
 

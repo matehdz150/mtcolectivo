@@ -4,6 +4,9 @@
   background: #f5f7fa;
 }
 
+/* ===============================
+   MAIN WRAPPER
+================================= */
 .prices-page {
   flex: 1;
   overflow: hidden;
@@ -21,11 +24,14 @@
   overflow: hidden;
 }
 
-/* HEADER */
+/* ===============================
+   HEADER
+================================= */
 .prices-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 20px;
 
   h1 {
     font-size: 26px;
@@ -44,10 +50,13 @@
     border: 1px solid #ddd;
     background: white;
     font-weight: 500;
+    min-width: 220px;
   }
 }
 
-/* CARD */
+/* ===============================
+   CARD
+================================= */
 .prices-card {
   background: white;
   padding: 24px;
@@ -92,7 +101,9 @@
   }
 }
 
-/* TABLA SCROLLEABLE */
+/* ===============================
+   TABLE
+================================= */
 .prices-table-wrapper {
   flex: 1;
   background: white;
@@ -102,9 +113,11 @@
   max-height: 500px;
 }
 
+/* scroll horizontal si no cabe */
 table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 700px;
 }
 
 thead {
@@ -161,4 +174,96 @@ tr:hover {
   text-align: center;
   padding: 40px;
   color: #999;
+}
+
+/* =====================================
+   📱 RESPONSIVE
+===================================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .prices-container {
+    padding: 30px;
+  }
+
+  .prices-form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  table {
+    min-width: 600px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .prices-layout {
+    flex-direction: column;
+  }
+
+  .prices-container {
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .prices-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    h1 {
+      font-size: 20px;
+    }
+
+    .service-select {
+      width: 100%;
+      min-width: unset;
+    }
+  }
+
+  .prices-card {
+    padding: 18px;
+  }
+
+  .prices-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .prices-table-wrapper {
+    max-height: 400px;
+  }
+
+  table {
+    min-width: 650px;
+  }
+
+  th,
+  td {
+    padding: 12px 14px;
+  }
+
+  input,
+  select {
+    font-size: 14px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .prices-container {
+    padding: 15px;
+  }
+
+  .prices-header h1 {
+    font-size: 18px;
+  }
+
+  .prices-table-wrapper {
+    max-height: 350px;
+  }
 }
