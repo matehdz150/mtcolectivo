@@ -10,7 +10,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { fetchStats } from "@/services/orders";
+import { fetchStats } from "../services/orders";
 import "./Stats.scss";
 
 type StatsData = {
