@@ -18,7 +18,15 @@ import {
 import "./Dashboard.scss";
 import { DownloadIcon, EyeIcon, TrashIcon } from "../components/Icons";
 import { useAuth } from "../contexts/AuthContext";
-import { ArrowDown, ArrowUp, Calendar, DollarSign, Search, SlidersHorizontal, Users } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Calendar,
+  DollarSign,
+  Search,
+  SlidersHorizontal,
+  Users,
+} from "lucide-react";
 
 type ApiState = "idle" | "loading" | "done" | "error";
 
@@ -400,137 +408,136 @@ export default function Dashboard() {
         </header>
 
         <section className="orders-filters">
-  <div className="filters-row filters-row--primary">
+          <div className="filters-row filters-row--primary">
+            {/* 🔎 BÚSQUEDA */}
+            <div className="filter search">
+              <Search size={16} />
+              <input
+                type="text"
+                placeholder="Buscar cliente o ID…"
+                value={filters.name}
+                onChange={(e) =>
+                  setFilters({ ...filters, name: e.target.value })
+                }
+              />
+            </div>
 
-    {/* 🔎 BÚSQUEDA */}
-    <div className="filter search">
-      <Search size={16} />
-      <input
-        type="text"
-        placeholder="Buscar cliente o ID…"
-        value={filters.name}
-        onChange={(e) =>
-          setFilters({ ...filters, name: e.target.value })
-        }
-      />
-    </div>
+            {/* 🔃 ORDENAMIENTO */}
+            <div className="sort-block">
+              <div className="filter sort-select">
+                <SlidersHorizontal size={16} />
+                <select
+                  value={filters.sortField}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      sortField: e.target.value as SortField,
+                    })
+                  }
+                >
+                  <option value="fecha">Fecha</option>
+                  <option value="nombre">Cliente</option>
+                  <option value="total">Monto</option>
+                </select>
+              </div>
 
-    {/* 🔃 ORDENAMIENTO */}
-    <div className="filter sort">
-      <SlidersHorizontal size={16} />
+              <button
+                className="btn-sort"
+                onClick={() =>
+                  setFilters({
+                    ...filters,
+                    sortDir: filters.sortDir === "asc" ? "desc" : "asc",
+                  })
+                }
+              >
+                {filters.sortDir === "asc" ? (
+                  <>
+                    <ArrowUp size={14} /> Ascendente
+                  </>
+                ) : (
+                  <>
+                    <ArrowDown size={14} /> Descendente
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
 
-      <select
-        value={filters.sortField}
-        onChange={(e) =>
-          setFilters({
-            ...filters,
-            sortField: e.target.value as SortField,
-          })
-        }
-      >
-        <option value="fecha">Fecha</option>
-        <option value="nombre">Cliente</option>
-        <option value="total">Monto</option>
-      </select>
+          {/* 📊 FILTROS SECUNDARIOS */}
+          <div className="filters-row filters-row--secondary">
+            <div className="filter">
+              <Calendar size={15} />
+              <input
+                type="date"
+                value={filters.dateFrom}
+                onChange={(e) =>
+                  setFilters({ ...filters, dateFrom: e.target.value })
+                }
+                title="Desde"
+              />
+            </div>
 
-      <button
-        className="btn-sort"
-        onClick={() =>
-          setFilters({
-            ...filters,
-            sortDir: filters.sortDir === "asc" ? "desc" : "asc",
-          })
-        }
-      >
-        {filters.sortDir === "asc" ? (
-          <>
-            <ArrowUp size={14} /> Asc
-          </>
-        ) : (
-          <>
-            <ArrowDown size={14} /> Desc
-          </>
-        )}
-      </button>
-    </div>
-  </div>
+            <div className="filter">
+              <Calendar size={15} />
+              <input
+                type="date"
+                value={filters.dateTo}
+                onChange={(e) =>
+                  setFilters({ ...filters, dateTo: e.target.value })
+                }
+                title="Hasta"
+              />
+            </div>
 
-  {/* 📊 FILTROS SECUNDARIOS */}
-  <div className="filters-row filters-row--secondary">
+            <div className="filter">
+              <DollarSign size={15} />
+              <input
+                type="number"
+                placeholder="Monto mín."
+                value={filters.minTotal}
+                onChange={(e) =>
+                  setFilters({ ...filters, minTotal: e.target.value })
+                }
+              />
+            </div>
 
-    <div className="filter">
-      <Calendar size={15} />
-      <input
-        type="date"
-        value={filters.dateFrom}
-        onChange={(e) =>
-          setFilters({ ...filters, dateFrom: e.target.value })
-        }
-        title="Desde"
-      />
-    </div>
+            <div className="filter">
+              <DollarSign size={15} />
+              <input
+                type="number"
+                placeholder="Monto máx."
+                value={filters.maxTotal}
+                onChange={(e) =>
+                  setFilters({ ...filters, maxTotal: e.target.value })
+                }
+              />
+            </div>
 
-    <div className="filter">
-      <Calendar size={15} />
-      <input
-        type="date"
-        value={filters.dateTo}
-        onChange={(e) =>
-          setFilters({ ...filters, dateTo: e.target.value })
-        }
-        title="Hasta"
-      />
-    </div>
+            <div className="filter">
+              <Users size={15} />
+              <input
+                type="number"
+                placeholder="Pasajeros mín."
+                value={filters.minCapacidad}
+                onChange={(e) =>
+                  setFilters({ ...filters, minCapacidad: e.target.value })
+                }
+              />
+            </div>
 
-    <div className="filter">
-      <DollarSign size={15} />
-      <input
-        type="number"
-        placeholder="Monto mín."
-        value={filters.minTotal}
-        onChange={(e) =>
-          setFilters({ ...filters, minTotal: e.target.value })
-        }
-      />
-    </div>
-
-    <div className="filter">
-      <DollarSign size={15} />
-      <input
-        type="number"
-        placeholder="Monto máx."
-        value={filters.maxTotal}
-        onChange={(e) =>
-          setFilters({ ...filters, maxTotal: e.target.value })
-        }
-      />
-    </div>
-
-    <div className="filter">
-      <Users size={15} />
-      <input
-        type="number"
-        placeholder="Pasajeros mín."
-        value={filters.minCapacidad}
-        onChange={(e) =>
-          setFilters({ ...filters, minCapacidad: e.target.value })
-        }
-      />
-    </div>
-
-    <div className="filter">
-      <Users size={15} />
-      <input
-        type="number"
-        placeholder="Pasajeros máx."
-        value={filters.maxCapacidad}
-        onChange={(e) =>
-          setFilters({ ...filters, maxCapacidad: e.target.value })
-        }
-      />
-    </div>
-  </div>
-</section>
+            <div className="filter">
+              <Users size={15} />
+              <input
+                type="number"
+                placeholder="Pasajeros máx."
+                value={filters.maxCapacidad}
+                onChange={(e) =>
+                  setFilters({ ...filters, maxCapacidad: e.target.value })
+                }
+              />
+            </div>
+          </div>
+        </section>
 
         {/* ===== ÓRDENES: Tabla Pro ===== */}
         <section className="orders-pro">

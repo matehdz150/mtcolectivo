@@ -45,7 +45,9 @@
       border-color: $color-brand-300;
       text-align: center;
       cursor: pointer;
-      transition: transform 0.08s ease, box-shadow 0.2s ease,
+      transition:
+        transform 0.08s ease,
+        box-shadow 0.2s ease,
         border-color 0.2s ease;
 
       &:hover {
@@ -438,19 +440,44 @@
     min-width: 260px;
   }
 
-  /* ---------- SORT BLOCK ---------- */
+  /* ---------- SORT BLOCK NUEVO ---------- */
 
-  .filter.sort {
+  .sort-block {
     display: flex;
-    align-items: center;
+    flex-direction: column; // 🔥 botón abajo
     gap: 0.6rem;
-    flex-wrap: wrap;       // 🔥 ahora sí puede romper línea
-    max-width: 100%;
+    min-width: 180px;
   }
 
-  .filter.sort select {
-    min-width: 140px;
-    flex: 0 1 auto;        // 🔥 flexible pero no exagerado
+  /* Select estilo input */
+  .sort-select {
+    width: 100%;
+  }
+
+  /* Botón separado visualmente */
+  .btn-sort {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #16a34a;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.18s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(22, 163, 74, 0.25);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 
   /* ---------- SORT BUTTON ---------- */
