@@ -143,6 +143,15 @@ def determine_cantaritos_price(capacidad: int, hora_salida: str) -> float:
 
     return price_info["normal"]   # <<<<<<  🔥 ahora precio normal
 
+@public_router.get("/fix-db")
+def fix_db(db: Session = Depends(get_db)):
+    db.execute("""
+        ALTER TABLE orders
+        ADD COLUMN IF NOT EXISTS service_id INTEGER;
+    """)
+    db.commit()
+    return {"status": "ok"}
+
 
 @public_router.post("/form-submit", include_in_schema=False)
 def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
