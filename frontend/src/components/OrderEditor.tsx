@@ -1,5 +1,6 @@
 import { Order, OrderUpdatePayload } from "@/services/orders";
 import { useEffect, useState } from "react";
+import "./OrderEditor.scss";
 
 type OrderEditorProps = {
   open: boolean;
