@@ -367,6 +367,8 @@
   flex-direction: column;
   gap: 1.2rem;
 
+  overflow: hidden; // 🔥 evita desbordamientos visuales
+
   /* ---------- ROWS ---------- */
 
   .filters-row {
@@ -374,6 +376,7 @@
     flex-wrap: wrap;
     gap: 0.8rem;
     align-items: center;
+    width: 100%;
   }
 
   /* ---------- PRIMARY ROW ---------- */
@@ -400,6 +403,7 @@
     border-radius: 12px;
     padding: 0.55rem 0.8rem;
     transition: all 0.15s ease;
+    min-width: 0; // 🔥 evita overflow interno
 
     svg {
       color: $color-muted;
@@ -413,7 +417,7 @@
       font-size: 0.85rem;
       color: $color-text;
       width: 100%;
-      min-width: 120px;
+      min-width: 0; // 🔥 importante para evitar desbordes
 
       &:focus {
         outline: none;
@@ -434,18 +438,19 @@
     min-width: 260px;
   }
 
-  /* ---------- SORT BLOCK (FIX IMPORTANTE) ---------- */
+  /* ---------- SORT BLOCK ---------- */
 
   .filter.sort {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    flex-wrap: nowrap;           // 🔥 evita que el botón baje
+    flex-wrap: wrap;       // 🔥 ahora sí puede romper línea
+    max-width: 100%;
   }
 
   .filter.sort select {
     min-width: 140px;
-    flex: 0 0 auto;              // 🔥 evita que crezca demasiado
+    flex: 0 1 auto;        // 🔥 flexible pero no exagerado
   }
 
   /* ---------- SORT BUTTON ---------- */
@@ -455,7 +460,7 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.45rem 0.9rem;
-    border-radius: 999px;        // pill moderno
+    border-radius: 999px;
     border: none;
     font-size: 0.78rem;
     font-weight: 600;
@@ -464,6 +469,8 @@
     cursor: pointer;
     transition: all 0.18s ease;
     white-space: nowrap;
+    flex-shrink: 0; // 🔥 evita que se comprima raro
+    max-width: 100%;
 
     &:hover {
       transform: translateY(-1px);
@@ -495,7 +502,8 @@
     }
 
     .filter.sort {
-      flex-wrap: wrap;           // 🔥 ahora sí puede romper en mobile
+      flex-direction: column;
+      align-items: stretch;
     }
 
     .btn-sort {
