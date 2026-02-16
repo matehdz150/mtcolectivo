@@ -395,7 +395,7 @@ export default function Dashboard() {
       <main className="content">
         <header className="content-header">
           <h2>Generador de Órdenes</h2>
-          <p>Sube tu archivo Excel o revisa las órdenes existentes.</p>
+          <p>Revisa las órdenes existentes.</p>
         </header>
 
         <section className="orders-filters">
