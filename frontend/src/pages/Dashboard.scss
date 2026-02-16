@@ -350,6 +350,10 @@
   cursor: pointer;
 }
 
+/* ============================= */
+/*         ORDERS FILTERS        */
+/* ============================= */
+
 .orders-filters {
   background: #ffffff;
   border-radius: 18px;
@@ -363,7 +367,7 @@
   flex-direction: column;
   gap: 1.2rem;
 
-  /* ===== ROWS ===== */
+  /* ---------- ROWS ---------- */
 
   .filters-row {
     display: flex;
@@ -372,98 +376,98 @@
     align-items: center;
   }
 
-  /* ===== PRIMARY ROW ===== */
+  /* ---------- PRIMARY ROW ---------- */
 
   .filters-row--primary {
     justify-content: space-between;
-
-    .search {
-      flex: 1;
-      min-width: 260px;
-      position: relative;
-
-      input {
-        width: 100%;
-        padding-left: 2.4rem;
-        font-size: 0.9rem;
-      }
-
-      &::before {
-        content: "🔍";
-        position: absolute;
-        left: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 0.9rem;
-        opacity: 0.5;
-      }
-    }
-
-    .sort {
-      display: flex;
-      gap: 0.6rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
   }
 
-  /* ===== SECONDARY ROW ===== */
+  /* ---------- SECONDARY ROW ---------- */
 
   .filters-row--secondary {
-    padding-top: 0.5rem;
+    padding-top: 0.8rem;
     border-top: 1px solid $color-border;
   }
 
-  /* ===== INPUTS & SELECT ===== */
+  /* ---------- FILTER CONTAINER ---------- */
 
-  input,
-  select {
-    padding: 0.6rem 0.85rem;
-    border-radius: 12px;
-    border: 1px solid $color-border;
-    font-size: 0.85rem;
+  .filter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     background: #f8fafc;
-    color: $color-text;
-    transition: all 0.18s ease;
-    min-width: 9rem;
+    border: 1px solid $color-border;
+    border-radius: 12px;
+    padding: 0.55rem 0.8rem;
+    transition: all 0.15s ease;
 
-    &:hover {
-      background: #f1f5f9;
+    svg {
+      color: $color-muted;
+      flex-shrink: 0;
     }
 
-    &:focus {
-      outline: none;
-      border-color: $color-brand-500;
+    input,
+    select {
+      border: none;
+      background: transparent;
+      font-size: 0.85rem;
+      color: $color-text;
+      width: 100%;
+      min-width: 120px;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &:focus-within {
       background: #ffffff;
+      border-color: $color-brand-500;
       box-shadow: 0 0 0 3px rgba($color-brand-500, 0.15);
     }
-
-    &::placeholder {
-      color: $color-muted;
-      font-size: 0.8rem;
-    }
   }
 
-  select {
-    cursor: pointer;
+  /* ---------- SEARCH ---------- */
+
+  .filter.search {
+    flex: 1;
+    min-width: 260px;
   }
 
-  /* ===== SORT BUTTON ===== */
+  /* ---------- SORT BLOCK (FIX IMPORTANTE) ---------- */
+
+  .filter.sort {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: nowrap;           // 🔥 evita que el botón baje
+  }
+
+  .filter.sort select {
+    min-width: 140px;
+    flex: 0 0 auto;              // 🔥 evita que crezca demasiado
+  }
+
+  /* ---------- SORT BUTTON ---------- */
 
   .btn-sort {
-    padding: 0.6rem 1rem;
-    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;        // pill moderno
     border: none;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 600;
-    background: linear-gradient(135deg, $color-brand-500, $color-brand-600);
+    background: #16a34a;
     color: #ffffff;
     cursor: pointer;
     transition: all 0.18s ease;
+    white-space: nowrap;
 
     &:hover {
       transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba($color-brand-600, 0.28);
+      box-shadow: 0 6px 14px rgba(22, 163, 74, 0.25);
     }
 
     &:active {
@@ -471,7 +475,7 @@
     }
   }
 
-  /* ===== RESPONSIVE ===== */
+  /* ---------- RESPONSIVE ---------- */
 
   @media (max-width: 768px) {
     padding: 1.2rem;
@@ -486,91 +490,17 @@
       gap: 0.6rem;
     }
 
-    input,
-    select,
+    .filter {
+      width: 100%;
+    }
+
+    .filter.sort {
+      flex-wrap: wrap;           // 🔥 ahora sí puede romper en mobile
+    }
+
     .btn-sort {
       width: 100%;
+      justify-content: center;
     }
-
-    .sort {
-      flex-direction: column;
-      width: 100%;
-    }
-  }
-}
-
-.orders-filters {
-
-  .filter {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #f8fafc;
-    border: 1px solid $color-border;
-    border-radius: 12px;
-    padding: 0.45rem 0.7rem;
-    transition: all 0.15s ease;
-
-    svg {
-      color: $color-muted;
-      flex-shrink: 0;
-    }
-
-    input,
-    select {
-      border: none;
-      background: transparent;
-      font-size: 0.85rem;
-      width: 100%;
-      color: $color-text;
-
-      &:focus {
-        outline: none;
-      }
-    }
-
-    &:focus-within {
-      background: #ffffff;
-      border-color: $color-brand-500;
-      box-shadow: 0 0 0 3px rgba($color-brand-500, 0.15);
-    }
-  }
-
-  .btn-sort {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 0.8rem;
-    border-radius: 10px;
-    border: none;
-    background: linear-gradient(
-      135deg,
-      $color-brand-500,
-      $color-brand-600
-    );
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 14px rgba($color-brand-600, 0.25);
-    }
-  }
-
-  .filters-row {
-    flex-wrap: wrap;
-    gap: 0.8rem;
-  }
-
-  .filters-row--primary {
-    justify-content: space-between;
-  }
-
-  .filters-row--secondary {
-    margin-top: 0.5rem;
   }
 }
