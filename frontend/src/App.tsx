@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Stats from "./pages/Stats";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           {/* Rutas protegidas */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/stats" element={<Stats />} />
           </Route>
 
           <Route path="*" element={<h2>Página no encontrada</h2>} />

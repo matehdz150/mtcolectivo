@@ -85,3 +85,8 @@ export async function wordFromData(
 
   return await res.blob();
 }
+
+export async function fetchStats(signal?: AbortSignal) {
+  const res = await authFetch(`${API_BASE}/orders/stats`, { signal });
+  return res.json();
+}

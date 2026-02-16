@@ -393,3 +393,108 @@ def update_order(order_id: int, payload: dict, db: Session = Depends(get_db)):
     db.refresh(order)
 
     return serialize_order(order)
+
+from sqlalchemy import func, desc
+from datetime import datetime
+
+@private_router.get("/stats")
+def get_orders_stats(db: Session = Depends(get_db)):
+
+    # ================================
+    # 📦 Totales generales
+    # ================================
+
+    total_orders = db.query(func.count(Order.id)).scalar() or 0
+
+    total_facturado = db.query(func.sum(Order.total)).scalar() or 0
+    total_abonado = db.query(func.sum(Order.abonado)).scalar() or 0
+    total_pendiente = db.query(func.sum(Order.liquidar)).scalar() or 0
+    ingresos_brutos = db.query(func.sum(Order.subtotal)).scalar() or 0
+    total_descuentos = db.query(func.sum(Order.descuento)).scalar() or 0
+
+    ticket_promedio = (
+        total_facturado / total_orders
+        if total_orders > 0 else 0
+    )
+
+    porcentaje_prom_descuento = (
+        (total_descuentos / ingresos_brutos) * 100
+        if ingresos_brutos > 0 else 0
+    )
+
+    # ================================
+    # 🚐 Capacidad más solicitada
+    # ================================
+
+    capacidad_top = (
+        db.query(Order.capacidadu, func.count(Order.id).label("count"))
+        .group_by(Order.capacidadu)
+        .order_by(desc("count"))
+        .first()
+    )
+
+    capacidad_mas_solicitada = capacidad_top[0] if capacidad_top else None
+
+    # ================================
+    # 📍 Destino más frecuente
+    # ================================
+
+    destino_top = (
+        db.query(Order.dir_destino, func.count(Order.id).label("count"))
+        .group_by(Order.dir_destino)
+        .order_by(desc("count"))
+        .first()
+    )
+
+    destino_mas_frecuente = destino_top[0] if destino_top else None
+
+    # ================================
+    # 📅 Mes actual
+    # ================================
+
+    now = datetime.utcnow()
+
+    ordenes_mes_actual = (
+        db.query(func.count(Order.id))
+        .filter(
+            func.extract("month", Order.created_at) == now.month,
+            func.extract("year", Order.created_at) == now.year
+        )
+        .scalar()
+        or 0
+    )
+
+    ingresos_mes_actual = (
+        db.query(func.sum(Order.total))
+        .filter(
+            func.extract("month", Order.created_at) == now.month,
+            func.extract("year", Order.created_at) == now.year
+        )
+        .scalar()
+        or 0
+    )
+
+    # ================================
+    # 🎯 Response
+    # ================================
+
+    return {
+        "finanzas": {
+            "total_facturado": round(total_facturado, 2),
+            "total_abonado": round(total_abonado, 2),
+            "total_pendiente": round(total_pendiente, 2),
+            "ingresos_brutos": round(ingresos_brutos, 2),
+            "total_descuentos": round(total_descuentos, 2),
+            "ticket_promedio": round(ticket_promedio, 2),
+            "porcentaje_promedio_descuento": round(porcentaje_prom_descuento, 2),
+        },
+        "operacion": {
+            "total_ordenes": total_orders,
+            "capacidad_mas_solicitada": capacidad_mas_solicitada,
+            "destino_mas_frecuente": destino_mas_frecuente,
+        },
+        "mes_actual": {
+            "ordenes": ordenes_mes_actual,
+            "ingresos": round(ingresos_mes_actual, 2),
+        }
+    }

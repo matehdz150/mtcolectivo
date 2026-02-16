@@ -2,7 +2,13 @@ import "./Sidebar.scss";
 import { useAuth } from "../contexts/AuthContext";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, LayoutDashboard, LogOut } from "lucide-react";
+import {
+  Menu,
+  X,
+  LayoutDashboard,
+  LogOut,
+  BarChart3
+} from "lucide-react";
 
 export default function Sidebar() {
   const { logout } = useAuth();
@@ -31,6 +37,7 @@ export default function Sidebar() {
 
       {/* ===== SIDEBAR ===== */}
       <aside className={`sidebar ${open ? "open" : ""}`}>
+
         {/* Mobile close */}
         <button className="close-btn" onClick={() => setOpen(false)}>
           <X size={18} />
@@ -45,6 +52,7 @@ export default function Sidebar() {
         </div>
 
         <nav className="sidebar__nav">
+
           <NavLink
             to="/dashboard"
             onClick={() => setOpen(false)}
@@ -55,6 +63,19 @@ export default function Sidebar() {
             <LayoutDashboard size={16} />
             Dashboard
           </NavLink>
+
+          {/* 🆕 ESTADÍSTICAS */}
+          <NavLink
+            to="/stats"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <BarChart3 size={16} />
+            Estadísticas
+          </NavLink>
+
         </nav>
 
         <div className="sidebar__footer">
@@ -67,7 +88,12 @@ export default function Sidebar() {
       </aside>
 
       {/* Overlay móvil */}
-      {open && <div className="sidebar-overlay" onClick={() => setOpen(false)} />}
+      {open && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setOpen(false)}
+        />
+      )}
     </>
   );
 }
