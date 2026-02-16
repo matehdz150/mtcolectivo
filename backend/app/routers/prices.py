@@ -5,6 +5,17 @@ from app.database import SessionLocal
 from app.deps import get_current_user
 from seed import run as run_seed
 
+
+seed_router = APIRouter(
+    prefix="/seed",
+    tags=["Seed"]
+)
+
+@seed_router.post("/prices")
+def seed_prices():
+    run_seed()
+    return {"status": "seed executed"}
+
 price_router = APIRouter(
     prefix="/service-prices",
     tags=["Service Prices"],
@@ -76,8 +87,3 @@ def delete_price(price_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"status": "deleted"}
-
-@price_router.post("/seed")
-def seed_prices(db: Session = Depends(get_db)):
-    run_seed()
-    return {"status": "seed executed"}
