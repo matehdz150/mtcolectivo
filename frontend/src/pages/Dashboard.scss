@@ -539,3 +539,96 @@
     }
   }
 }
+
+@media (max-width: 1024px) {
+
+  .content {
+    padding: 1.5rem;
+  }
+
+  .orders-pro__body {
+    max-height: 60vh;
+  }
+
+  .orders-filters {
+    padding: 1.2rem;
+  }
+
+  .orders-filters .filter.search {
+    min-width: 220px;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  /* Dashboard pasa a 1 columna */
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  /* Espaciado general */
+  .content {
+    padding: 1rem;
+  }
+
+  /* Tabla se adapta */
+  .orders-pro__row {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .orders-pro__head {
+    display: none; /* Oculta encabezado en móvil */
+  }
+
+  .orders-pro__body {
+    max-height: 65vh;
+  }
+
+  /* Acciones alineadas a la izquierda */
+  .orders-pro__row .cell--acciones {
+    justify-content: flex-start;
+  }
+
+  /* Filtros */
+  .orders-filters {
+    padding: 1rem;
+  }
+
+  .orders-filters .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .orders-filters .filter {
+    width: 100%;
+  }
+
+  .orders-filters .btn-sort {
+    width: 100%;
+    justify-content: center;
+  }
+
+}
+
+@media (max-width: 480px) {
+
+  .orders-pro__body {
+    max-height: 70vh;
+  }
+
+  .orders-filters {
+    gap: 0.8rem;
+  }
+
+  .orders-filters .filter {
+    padding: 0.5rem 0.7rem;
+  }
+
+  .icon-chip {
+    width: 30px;
+    height: 30px;
+  }
+
+}
