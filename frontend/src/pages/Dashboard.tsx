@@ -235,20 +235,6 @@ export default function Dashboard() {
       URL.revokeObjectURL(pdfUrl);
 
       // ========================
-      // 2️⃣ Descargar Word
-      // ========================
-      const wordBlob = await wordFromData(order, ac.signal);
-      const wordUrl = URL.createObjectURL(wordBlob);
-
-      const wordLink = document.createElement("a");
-      wordLink.href = wordUrl;
-      wordLink.download = `orden_${order.id}.docx`;
-      document.body.appendChild(wordLink);
-      wordLink.click();
-      document.body.removeChild(wordLink);
-      URL.revokeObjectURL(wordUrl);
-
-      // ========================
       // Final UI
       // ========================
       setModalStatus("done");
