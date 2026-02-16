@@ -314,3 +314,62 @@ def reset_payment(order_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(order)
     return serialize_order(order)
+
+@private_router.put("/{order_id}")
+def update_order(order_id: int, payload: dict, db: Session = Depends(get_db)):
+    order = db.get(Order, order_id)
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    # ================================
+    # Actualizar campos editables
+    # ================================
+    order.nombre = payload.get("nombre", order.nombre)
+    order.fecha = payload.get("fecha", order.fecha)
+    order.dir_salida = payload.get("direccion_salida", order.dir_salida)
+    order.dir_destino = payload.get("destino", order.dir_destino)
+    order.hor_ida = payload.get("hora_salida", order.hor_ida)
+    order.hor_regreso = payload.get("hora_regreso", order.hor_regreso)
+
+    pasajeros = int(payload.get("personas", order.capacidadu or 0))
+
+    # ================================
+    # Recalcular duración
+    # ================================
+    try:
+        t1 = parse_time(order.hor_ida)
+        t2 = parse_time(order.hor_regreso)
+        duracion = (t2 - t1).total_seconds() / 3600
+        if duracion < 0:
+            duracion += 24
+        order.duracion = duracion
+    except:
+        pass
+
+    # ================================
+    # Recalcular capacidad
+    # ================================
+    capacidadu = assign_capacidad(pasajeros)
+    order.capacidadu = capacidadu
+
+    # ================================
+    # Recalcular precio
+    # ================================
+    destino = (order.dir_destino or "").lower()
+
+    if is_cantaritos(destino):
+        subtotal = determine_cantaritos_price(capacidadu, order.hor_ida)
+    else:
+        subtotal = PRICE_TABLE.get(capacidadu, 0.0)
+
+    order.subtotal = subtotal
+
+    # Mantener descuento si ya existía
+    order.total = order.subtotal - order.descuento
+    order.liquidar = order.total - order.abonado
+
+    db.commit()
+    db.refresh(order)
+
+    return serialize_order(order)
