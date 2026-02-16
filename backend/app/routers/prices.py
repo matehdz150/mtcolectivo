@@ -4,6 +4,7 @@ from app.models import ServicePrice, Service
 from app.database import SessionLocal
 from app.deps import get_current_user
 from seed import run as run_seed
+from app.services.service_resolver import resolve_service
 
 
 seed_router = APIRouter(
@@ -87,3 +88,10 @@ def delete_price(price_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"status": "deleted"}
+
+# services_router.py o en el mismo archivo
+
+@price_router.get("/services")
+def list_services(db: Session = Depends(get_db)):
+    services = db.query(Service).order_by(Service.name.asc()).all()
+    return services

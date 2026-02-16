@@ -1,152 +1,137 @@
 .prices-page {
+  background: #f4f6fa;
   min-height: 100vh;
-  background: #f4f6fb;
   padding: 40px;
-}
 
-.prices-container {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.prices-header {
-  margin-bottom: 30px;
-
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1f2937;
+  .prices-container {
+    max-width: 1100px;
+    margin: 0 auto;
   }
 
-  p {
-    color: #6b7280;
-    margin-top: 6px;
-  }
-}
+  .prices-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
 
-.prices-card {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 30px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
-  border: 1px solid #e5e7eb;
-
-  h2 {
-    margin-bottom: 16px;
-    font-weight: 600;
-  }
-}
-
-.prices-form-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-  margin-bottom: 20px;
-
-  input,
-  select {
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid #d1d5db;
-    font-size: 14px;
-    transition: all 0.2s ease;
-
-    &:focus {
-      outline: none;
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-    }
-  }
-}
-
-.btn-primary {
-  background: #16a34a;
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s ease;
-
-  &:hover {
-    background: #15803d;
-  }
-}
-
-.prices-table-wrapper {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
-  border: 1px solid #e5e7eb;
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-
-    thead {
-      background: #f3f4f6;
-
-      th {
-        padding: 16px;
-        text-align: left;
-        font-size: 13px;
-        text-transform: uppercase;
-        color: #6b7280;
-      }
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 5px;
     }
 
-    tbody tr {
-      border-top: 1px solid #f0f0f0;
-      transition: background 0.2s ease;
-
-      &:hover {
-        background: #fafafa;
-      }
+    p {
+      color: #6b7280;
+      font-size: 14px;
     }
 
-    td {
-      padding: 14px 16px;
+    .service-select {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: white;
+      font-weight: 500;
+    }
+  }
+
+  .prices-card {
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .prices-form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
 
       input,
       select {
-        width: 100%;
-        padding: 6px 10px;
+        padding: 10px 12px;
         border-radius: 8px;
         border: 1px solid #d1d5db;
-        font-size: 13px;
+        transition: 0.2s;
 
         &:focus {
-          outline: none;
           border-color: #6366f1;
+          outline: none;
+          box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
         }
       }
     }
+
+    .btn-primary {
+      margin-top: 20px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: none;
+      background: #6366f1;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+
+      &:hover {
+        background: #4f46e5;
+      }
+    }
   }
-}
 
-.btn-delete {
-  background: none;
-  border: none;
-  color: #dc2626;
-  font-weight: 500;
-  cursor: pointer;
+  .prices-table-wrapper {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
 
-  &:hover {
-    color: #991b1b;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+
+      thead {
+        background: #f3f4f6;
+      }
+
+      th,
+      td {
+        padding: 14px;
+        text-align: left;
+      }
+
+      tbody tr {
+        border-top: 1px solid #e5e7eb;
+      }
+
+      input,
+      select {
+        padding: 6px 8px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+      }
+
+      .btn-delete {
+        background: none;
+        border: none;
+        color: #dc2626;
+        font-weight: 600;
+        cursor: pointer;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      .empty {
+        text-align: center;
+        padding: 30px;
+        color: #9ca3af;
+      }
+    }
   }
-}
-
-.loading {
-  padding: 40px;
-  text-align: center;
-  color: #6b7280;
-}
-
-.empty {
-  text-align: center;
-  padding: 40px;
-  color: #9ca3af;
 }

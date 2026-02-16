@@ -55,3 +55,16 @@ export async function deleteServicePrice(priceId: number): Promise<void> {
     method: "DELETE",
   });
 }
+
+export interface Service {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+
+// 🔹 Servicios
+export async function getServices(): Promise<Service[]> {
+  const res = await authFetch(`${API_BASE}/service-prices/services`);
+  return res.json();
+}
