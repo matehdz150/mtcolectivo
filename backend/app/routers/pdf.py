@@ -187,7 +187,7 @@ from docx import Document
 from io import BytesIO
 
 def generate_docx_from_template(mapping: dict) -> bytes:
-    doc = Document("app/PlantillaOrden.docx")
+    doc = Document("PlantillaOrden.docx")
 
     for paragraph in doc.paragraphs:
         for key, value in mapping.items():
