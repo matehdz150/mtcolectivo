@@ -186,20 +186,40 @@ async def pdf_from_data(
 from docx import Document
 from io import BytesIO
 
+def _replace_tokens_in_paragraph(paragraph, mapping: dict) -> None:
+    # Une runs -> reemplaza sobre el texto completo -> reescribe
+    full = "".join(run.text for run in paragraph.runs)
+    if not full:
+        return
+
+    changed = False
+    for key, value in mapping.items():
+        if key in full:
+            full = full.replace(key, value)
+            changed = True
+
+    if not changed:
+        return
+
+    # Limpia todos los runs y deja el texto en el primero
+    for run in paragraph.runs:
+        run.text = ""
+    paragraph.runs[0].text = full
+
+
 def generate_docx_from_template(mapping: dict) -> bytes:
     doc = Document("PlantillaOrden.docx")
 
+    # Párrafos normales
     for paragraph in doc.paragraphs:
-        for key, value in mapping.items():
-            if key in paragraph.text:
-                paragraph.text = paragraph.text.replace(key, value)
+        _replace_tokens_in_paragraph(paragraph, mapping)
 
+    # Tablas (las celdas tienen párrafos)
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
-                for key, value in mapping.items():
-                    if key in cell.text:
-                        cell.text = cell.text.replace(key, value)
+                for paragraph in cell.paragraphs:
+                    _replace_tokens_in_paragraph(paragraph, mapping)
 
     buffer = BytesIO()
     doc.save(buffer)
