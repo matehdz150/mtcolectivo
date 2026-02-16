@@ -399,88 +399,100 @@ export default function Dashboard() {
         </header>
 
         <section className="orders-filters">
-          <input
-            type="text"
-            placeholder="Buscar cliente…"
-            value={filters.name}
-            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-          />
+          <div className="filters-row filters-row--primary">
+            <div className="filter search">
+              <input
+                type="text"
+                placeholder="Buscar cliente…"
+                value={filters.name}
+                onChange={(e) =>
+                  setFilters({ ...filters, name: e.target.value })
+                }
+              />
+            </div>
 
-          <input
-            type="date"
-            value={filters.dateFrom}
-            onChange={(e) =>
-              setFilters({ ...filters, dateFrom: e.target.value })
-            }
-          />
+            <div className="filter sort">
+              <select
+                value={filters.sortField}
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    sortField: e.target.value as SortField,
+                  })
+                }
+              >
+                <option value="fecha">Ordenar por fecha</option>
+                <option value="nombre">Ordenar por nombre</option>
+                <option value="total">Ordenar por precio</option>
+              </select>
 
-          <input
-            type="date"
-            value={filters.dateTo}
-            onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-          />
+              <button
+                className="btn-sort"
+                onClick={() =>
+                  setFilters({
+                    ...filters,
+                    sortDir: filters.sortDir === "asc" ? "desc" : "asc",
+                  })
+                }
+              >
+                {filters.sortDir === "asc" ? "↑ Ascendente" : "↓ Descendente"}
+              </button>
+            </div>
+          </div>
 
-          <input
-            type="number"
-            placeholder="Min $"
-            value={filters.minTotal}
-            onChange={(e) =>
-              setFilters({ ...filters, minTotal: e.target.value })
-            }
-          />
+          <div className="filters-row filters-row--secondary">
+            <input
+              type="date"
+              value={filters.dateFrom}
+              onChange={(e) =>
+                setFilters({ ...filters, dateFrom: e.target.value })
+              }
+            />
 
-          <input
-            type="number"
-            placeholder="Max $"
-            value={filters.maxTotal}
-            onChange={(e) =>
-              setFilters({ ...filters, maxTotal: e.target.value })
-            }
-          />
+            <input
+              type="date"
+              value={filters.dateTo}
+              onChange={(e) =>
+                setFilters({ ...filters, dateTo: e.target.value })
+              }
+            />
 
-          <input
-            type="number"
-            placeholder="Min pasajeros"
-            value={filters.minCapacidad}
-            onChange={(e) =>
-              setFilters({ ...filters, minCapacidad: e.target.value })
-            }
-          />
+            <input
+              type="number"
+              placeholder="Min $"
+              value={filters.minTotal}
+              onChange={(e) =>
+                setFilters({ ...filters, minTotal: e.target.value })
+              }
+            />
 
-          <input
-            type="number"
-            placeholder="Max pasajeros"
-            value={filters.maxCapacidad}
-            onChange={(e) =>
-              setFilters({ ...filters, maxCapacidad: e.target.value })
-            }
-          />
+            <input
+              type="number"
+              placeholder="Max $"
+              value={filters.maxTotal}
+              onChange={(e) =>
+                setFilters({ ...filters, maxTotal: e.target.value })
+              }
+            />
 
-          <select
-            value={filters.sortField}
-            onChange={(e) =>
-              setFilters({
-                ...filters,
-                sortField: e.target.value as SortField,
-              })
-            }
-          >
-            <option value="fecha">Fecha</option>
-            <option value="nombre">Nombre</option>
-            <option value="total">Precio</option>
-          </select>
+            <input
+              type="number"
+              placeholder="Min pasajeros"
+              value={filters.minCapacidad}
+              onChange={(e) =>
+                setFilters({ ...filters, minCapacidad: e.target.value })
+              }
+            />
 
-          <button
-            className="btn-sort"
-            onClick={() =>
-              setFilters({
-                ...filters,
-                sortDir: filters.sortDir === "asc" ? "desc" : "asc",
-              })
-            }
-          >
-            {filters.sortDir === "asc" ? "↑ Asc" : "↓ Desc"}
-          </button>
+            <input
+              type="number"
+              placeholder="Max pasajeros"
+              value={filters.maxCapacidad}
+              onChange={(e) =>
+                setFilters({ ...filters, maxCapacidad: e.target.value })
+              }
+            />
+          </div>
         </section>
 
         {/* ===== ÓRDENES: Tabla Pro ===== */}

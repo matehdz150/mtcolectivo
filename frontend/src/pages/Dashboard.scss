@@ -306,34 +306,94 @@
 }
 
 .orders-filters {
+  background: #ffffff;
+  border: 1px solid $color-border;
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+
   display: flex;
-  flex-wrap: wrap;
-  gap: .6rem;
-  margin-top: 1rem;
-  margin-bottom: .75rem;
+  flex-direction: column;
+  gap: 1rem;
+
+  .filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    align-items: center;
+  }
+
+  /* ===== Primary Row ===== */
+  .filters-row--primary {
+    justify-content: space-between;
+
+    .search {
+      flex: 1;
+      min-width: 220px;
+
+      input {
+        width: 100%;
+      }
+    }
+
+    .sort {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+  }
+
+  /* ===== Secondary Row ===== */
+  .filters-row--secondary {
+    gap: 0.6rem;
+  }
 
   input,
   select {
-    padding: .45rem .6rem;
-    border-radius: .55rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 10px;
     border: 1px solid $color-border;
-    font-size: .85rem;
-    background: #fff;
+    font-size: 0.85rem;
+    background: #f8fafc;
     color: $color-text;
+    transition: all 0.15s ease;
     min-width: 8rem;
 
     &:focus {
       outline: none;
       border-color: $color-brand-500;
-      box-shadow: 0 0 0 2px rgba($color-brand-500, .15);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba($color-brand-500, 0.15);
+    }
+
+    &::placeholder {
+      color: $color-muted;
+      font-size: 0.8rem;
     }
   }
 
+  /* ===== Sort Button ===== */
   .btn-sort {
-    @include btn-primary(.45rem, .9rem);
-    font-size: .8rem;
-    display: flex;
-    align-items: center;
-    gap: .25rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 10px;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: linear-gradient(135deg, $color-brand-500, $color-brand-600);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba($color-brand-600, 0.25);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 }
