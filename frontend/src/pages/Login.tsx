@@ -31,7 +31,12 @@ export default function Login() {
         login({ username: user, password: pass }),
         {
           loading: { title: "Iniciando sesión..." },
-          success: { title: "Bienvenido" },
+          success: { title: "Bienvenido", description: "Sesion iniciada",
+          fill: "black",
+          styles: {
+            title: "text-white!",
+            description: "text-white/75!",
+          }, },
           error: { title: "Credenciales incorrectas" },
         },
       );

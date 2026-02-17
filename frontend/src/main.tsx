@@ -5,7 +5,7 @@ import { Toaster } from 'sileo';
 
 createRoot(document.getElementById('root')).render(
     <>
-    <Toaster position="top-right" />
+    <Toaster position="top-center" />
     <App />
     </>
 )

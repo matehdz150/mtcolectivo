@@ -28,8 +28,15 @@ export default function Stats() {
   useEffect(() => {
     sileo
       .promise(fetchStats(), {
-        loading: { title: "Cargando estadísticas..." },
-        success: { title: "Datos actualizados" },
+        loading: { title: "Cargando estadísticas..."},
+        success: { title: "Datos actualizados", description: 'Estadisticas cargadas', autopilot: {
+    expand: 500,
+    collapse: 3000,
+  }, fill: "black",
+  styles: {
+    title: "text-white!",
+    description: "text-white/75!",
+  },},
         error: { title: "Error al cargar estadísticas" },
       })
       .then(setData);
