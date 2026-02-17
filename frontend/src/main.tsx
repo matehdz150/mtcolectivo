@@ -12,14 +12,14 @@ createRoot(document.getElementById("root")).render(
         fill: "#171717",
         roundness: 18,
         styles: {
-          description: "text-white/75!",
+          title: "sileo-dark",
+          description: "sileo-dark",
         },
         autopilot: {
-            expand: 500,
-            collapse: 3000,
-          },
+          expand: 500,
+          collapse: 3000,
+        },
       }}
-      
     />
     <App />
   </>,
