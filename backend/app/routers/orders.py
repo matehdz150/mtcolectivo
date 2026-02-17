@@ -10,14 +10,14 @@ from app.deps import get_current_user
 from app.schemas import User
 
 # ================================
-# 🔐 API KEY para Google Forms
+# API KEY para Google Forms
 # ================================
 FORM_API_KEY = os.getenv("FORM_API_KEY", "super-secret-key")
 
 
 # ================================
-# 🟢 ENDPOINT PÚBLICO PARA GOOGLE FORMS
-# (NO requiere JWT)
+# ENDPOINT PÚBLICO PARA GOOGLE FORMS
+
 # ================================
 public_router = APIRouter(prefix="/orders", tags=["Orders – Public"])
 

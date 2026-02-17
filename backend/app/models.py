@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
 from datetime import datetime
-from app.database import Base  # ✅ ya no con ".."
+from app.database import Base  
 
 class Order(Base):
     __tablename__ = "orders"
@@ -17,7 +17,7 @@ class Order(Base):
     capacidadu = Column(String, nullable=True)
 
     # montos
-    subtotal = Column(Float, nullable=True)   # 👈 NUEVO
+    subtotal = Column(Float, nullable=True)  
     descuento = Column(Float, nullable=True)
     total = Column(Float, nullable=True)      # total final (subtotal - descuento)
     abonado = Column(Float, nullable=True)
