@@ -1,0 +1,217 @@
+/* ================================
+   OVERLAY
+================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* ================================
+   MODAL CONTAINER
+================================ */
+.modal-body {
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;       /* 👈 evita que se salga */
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.12),
+    0 8px 18px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;       /* 👈 importante */
+  animation: slideUp 0.25s ease-out;
+}
+
+/* ================================
+   HEADER FIJO
+================================ */
+.modal-body h2 {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 1.6rem 2rem 1rem 2rem;
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #0f172a;
+  border-bottom: 1px solid #e5e7eb;
+  z-index: 5;
+}
+
+/* ================================
+   SCROLLABLE CONTENT
+================================ */
+.modal-body form,
+.modal-body > :not(h2):not(.actions) {
+  padding: 1.2rem 2rem;
+}
+
+.modal-body {
+  overflow-y: auto;
+}
+
+/* Scroll elegante */
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.4);
+  border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ================================
+   LABELS
+================================ */
+.modal-body label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 0.3rem;
+  margin-top: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+/* ================================
+   INPUTS
+================================ */
+.modal-body input {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.9rem;
+  background: #f8fafc;
+  transition: all 0.15s ease;
+}
+
+.modal-body input:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* ================================
+   SEPARATOR
+================================ */
+.modal-body hr {
+  margin: 1.5rem 0;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* ================================
+   FOOTER FIJO
+================================ */
+.actions {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 1rem 2rem 1.5rem 2rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+/* ================================
+   BUTTONS
+================================ */
+.btn {
+  padding: 0.55rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f1f5f9;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn:hover {
+  background: #e2e8f0;
+}
+
+.btn-primary {
+  padding: 0.55rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(79, 70, 229, 0.25);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* ================================
+   ANIMATIONS
+================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+@media (max-width: 640px) {
+  .modal-body {
+    max-width: 100%;
+    border-radius: 14px;
+  }
+
+  .modal-body h2 {
+    padding: 1.2rem 1.4rem 0.8rem 1.4rem;
+  }
+
+  .modal-body > :not(h2):not(.actions) {
+    padding: 1rem 1.4rem;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+    padding: 1rem 1.4rem 1.4rem 1.4rem;
+  }
+
+  .btn,
+  .btn-primary {
+    width: 100%;
+  }
+}

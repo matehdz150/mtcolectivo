@@ -132,7 +132,7 @@ async def pdf_from_excel(
 @router.post("/from-data")
 async def pdf_from_data(
     data: Dict[str, Any],
-    current_user: User = Depends(get_current_user),  # ✅ protegido
+    current_user: User = Depends(get_current_user),
 ):
     try:
         def g(d: Dict[str, Any], k: str) -> str:
@@ -180,5 +180,103 @@ async def pdf_from_data(
             media_type="application/pdf",
             headers={"Content-Disposition": 'attachment; filename="orden.pdf"'},
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+from docx import Document
+from io import BytesIO
+
+def _replace_tokens_in_paragraph(paragraph, mapping: dict) -> None:
+    # Une runs -> reemplaza sobre el texto completo -> reescribe
+    full = "".join(run.text for run in paragraph.runs)
+    if not full:
+        return
+
+    changed = False
+    for key, value in mapping.items():
+        if key in full:
+            full = full.replace(key, value)
+            changed = True
+
+    if not changed:
+        return
+
+    # Limpia todos los runs y deja el texto en el primero
+    for run in paragraph.runs:
+        run.text = ""
+    paragraph.runs[0].text = full
+
+
+def generate_docx_from_template(mapping: dict) -> bytes:
+    doc = Document("PlantillaOrden.docx")
+
+    # Párrafos normales
+    for paragraph in doc.paragraphs:
+        _replace_tokens_in_paragraph(paragraph, mapping)
+
+    # Tablas (las celdas tienen párrafos)
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    _replace_tokens_in_paragraph(paragraph, mapping)
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer.read()
+    
+@router.post("/from-data-word")
+async def word_from_data(
+    data: Dict[str, Any],
+    current_user: User = Depends(get_current_user),
+):
+    try:
+        def g(d: Dict[str, Any], k: str) -> str:
+            for cand in (k, k.lower(), k.upper()):
+                if cand in d:
+                    v = d[cand]
+                    return "" if v is None else str(v)
+            return ""
+
+        # ========= Leer valores =========
+        s_subtotal  = g(data, "subtotal")
+        s_descuento = g(data, "descuento")
+        s_abonado   = g(data, "abonado")
+
+        subtotal  = parse_num(s_subtotal)
+        descuento = parse_num(s_descuento)
+        abonado   = parse_num(s_abonado)
+
+        total    = subtotal - descuento
+        liquidar = total - abonado
+
+        mapping = {
+            "&NOMBRE&": g(data, "nombre"),
+            "&FECHA&": g(data, "fecha"),
+            "&DIR_SALIDA&": g(data, "dir_salida"),
+            "&DIR_DESTINO&": g(data, "dir_destino"),
+            "&HOR_IDA&": g(data, "hor_ida"),
+            "&HOR_REGRESO&": g(data, "hor_regreso"),
+            "&DURACION&": g(data, "duracion"),
+            "&CAPACIDADU&": g(data, "capacidadu"),
+            "&SUBTOTAL&": f"{subtotal:.2f}",
+            "&DESCUENTO&": f"{descuento:.2f}",
+            "&TOTAL&": f"{total:.2f}",
+            "&ABONADO&": f"{abonado:.2f}",
+            "&FECHA_ABONO&": g(data, "fecha_abono"),
+            "&LIQUIDAR&": f"{liquidar:.2f}",
+        }
+
+        docx_bytes = generate_docx_from_template(mapping)
+
+        return StreamingResponse(
+            BytesIO(docx_bytes),
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={
+                "Content-Disposition": 'attachment; filename="orden.docx"'
+            },
+        )
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

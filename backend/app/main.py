@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.routers import pdf, orders, auth
 from app.routers.orders import public_router, private_router
+from app.routers.prices import price_router, seed_router
 
 app = FastAPI(
     title="MT Colectivo API",
@@ -32,6 +33,9 @@ app.include_router(pdf.router)
 
 # 🟢 PUBLICO: Google Forms puede entrar aquí
 app.include_router(public_router)
+app.include_router(price_router)
+app.include_router(seed_router)
+
 
 # 🔐 PRIVADO
 app.include_router(private_router)
@@ -43,7 +47,10 @@ app.include_router(orders.private_router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # en producción puedes limitar esto
+    allow_origins=[
+        "https://mtcolectivo.vercel.app",
+        "http://localhost:3000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

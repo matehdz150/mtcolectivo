@@ -1,13 +1,16 @@
 import re
 from fastapi import APIRouter, Depends, HTTPException, Response, Request
+from app.services.pricing_engine import PricingEngine
 from sqlalchemy.orm import Session
 from datetime import timezone
 import os
+from sqlalchemy import text
 
 from app.database import SessionLocal
-from app.models import Order
+from app.models import Order, Service
 from app.deps import get_current_user
 from app.schemas import User
+import unicodedata
 
 # ================================
 # API KEY para Google Forms
@@ -142,60 +145,137 @@ def determine_cantaritos_price(capacidad: int, hora_salida: str) -> float:
 
     return price_info["normal"]   # <<<<<<  🔥 ahora precio normal
 
+@public_router.get("/fix-db")
+def fix_db(db: Session = Depends(get_db)):
+
+    db.execute(text("""
+        ALTER TABLE orders
+        ADD COLUMN IF NOT EXISTS service_id INTEGER;
+    """))
+
+    db.execute(text("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1
+                FROM information_schema.table_constraints
+                WHERE constraint_name = 'fk_orders_service'
+            ) THEN
+                ALTER TABLE orders
+                ADD CONSTRAINT fk_orders_service
+                FOREIGN KEY (service_id) REFERENCES services(id);
+            END IF;
+        END$$;
+    """))
+
+    db.commit()
+
+    return {"status": "ok"}
+
+
+def normalize(text: str) -> str:
+    if not text:
+        return ""
+    text = text.lower()
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(c for c in text if unicodedata.category(c) != "Mn")
+    return text
+
+
+def resolve_service_by_destino(destino: str, db: Session):
+    destino_norm = normalize(destino)
+
+    services = db.query(Service).filter(Service.active == True).all()
+
+    # 1️⃣ match por slug
+    for service in services:
+        if normalize(service.slug) in destino_norm:
+            return service
+
+    # 2️⃣ match por nombre
+    for service in services:
+        if normalize(service.name) in destino_norm:
+            return service
+
+    # 3️⃣ fallback seguro (primer servicio activo)
+    if services:
+        return services[0]
+
+    return None
 
 @public_router.post("/form-submit", include_in_schema=False)
 def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
-    print(payload)
-    # --- Seguridad con API KEY ---
+
+    # ================================
+    # 🔐 API KEY
+    # ================================
     api_key = request.headers.get("x-api-key")
     if api_key != FORM_API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API key")
 
-    # --- Lectura de datos del formulario ---
-    pasajeros_str = payload.get("personas", "0")
-    pasajeros = int(pasajeros_str)
+    # ================================
+    # 📥 Datos del Form
+    # ================================
+    pasajeros = int(payload.get("personas", 0))
+    hora_ida = payload.get("hora_salida")
+    hora_reg = payload.get("hora_regreso")
+    destino = payload.get("destino", "")
 
-    hora_ida_raw = payload.get("hora_salida")
-    hora_reg_raw = payload.get("hora_regreso")
+    if pasajeros <= 0:
+        raise HTTPException(status_code=400, detail="Cantidad de pasajeros inválida")
 
-    # --- Duration ---
+    # ================================
+    # 🔎 Resolver servicio automáticamente
+    # ================================
+    service = resolve_service_by_destino(destino, db)
+
+    if not service:
+        raise HTTPException(status_code=500, detail="No hay servicios configurados")
+
+    # ================================
+    # ⏱ Calcular duración
+    # ================================
     try:
-        t1 = parse_time(hora_ida_raw)
-        t2 = parse_time(hora_reg_raw)
-        duracion = (t2 - t1).total_seconds() / 3600  # horas
+        t1 = datetime.strptime(hora_ida, "%H:%M")
+        t2 = datetime.strptime(hora_reg, "%H:%M")
+        duracion = (t2 - t1).total_seconds() / 3600
         if duracion < 0:
-            duracion += 24  # viaje cruza medianoche
+            duracion += 24
     except:
         duracion = 0.0
 
-    # --- Capacidad asignada ---
-    capacidadu = assign_capacidad(pasajeros)
+    # ================================
+    # 💰 Pricing Engine
+    # ================================
+    engine = PricingEngine(db)
 
-    # --- Precio total según capacidad ---
-    destino = payload.get("destino", "").lower()
-    if is_cantaritos(destino):
-        total = determine_cantaritos_price(capacidadu, payload.get("hora_salida"))
-    else:
-        total = PRICE_TABLE.get(capacidadu, 0.0)
+    subtotal, capacidad_asignada = engine.calculate(
+        service_slug=service.slug,
+        pasajeros=pasajeros,
+        duracion_horas=duracion
+    )
 
-    # --- Crear orden ---
+    if capacidad_asignada is None:
+        raise HTTPException(status_code=400, detail="No hay capacidades configuradas")
+
+    # ================================
+    # 📝 Crear orden
+    # ================================
     order = Order(
+        service_id=service.id,
         nombre=payload.get("nombre"),
         fecha=payload.get("fecha"),
         dir_salida=payload.get("direccion_salida"),
-        dir_destino=payload.get("destino"),
-        hor_ida=payload.get("hora_salida"),
-        hor_regreso=payload.get("hora_regreso"),
-
+        dir_destino=destino,
+        hor_ida=hora_ida,
+        hor_regreso=hora_reg,
         duracion=duracion,
-        capacidadu=capacidadu,
-
-        subtotal=total,
+        capacidadu=capacidad_asignada,
+        subtotal=subtotal,
         descuento=0.0,
-        total=total,           # Precio asignado
+        total=subtotal,
         abonado=0.0,
-        fecha_abono=None,
-        liquidar=total,
+        liquidar=subtotal
     )
 
     db.add(order)
@@ -204,11 +284,10 @@ def form_submit(request: Request, payload: dict, db: Session = Depends(get_db)):
 
     return {
         "status": "ok",
-        "hora ida": hora_ida_raw,
         "order_id": order.id,
-        "capacidad_asignada": capacidadu,
-        "duracion_horas": duracion,
-        "precio_total": total
+        "service_resolved": service.slug,
+        "capacidad_asignada": capacidad_asignada,
+        "precio_total": subtotal
     }
 
 
@@ -314,3 +393,190 @@ def reset_payment(order_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(order)
     return serialize_order(order)
+
+@private_router.put("/{order_id}")
+def update_order(order_id: int, payload: dict, db: Session = Depends(get_db)):
+    order = db.get(Order, order_id)
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    # ================================
+    # Actualizar campos básicos
+    # ================================
+    order.nombre = payload.get("nombre", order.nombre)
+    order.fecha = payload.get("fecha", order.fecha)
+    order.dir_salida = payload.get("direccion_salida", order.dir_salida)
+    order.dir_destino = payload.get("destino", order.dir_destino)
+    order.hor_ida = payload.get("hora_salida", order.hor_ida)
+    order.hor_regreso = payload.get("hora_regreso", order.hor_regreso)
+
+    # ================================
+    # Recalcular duración (si cambian horas)
+    # ================================
+    try:
+        if order.hor_ida and order.hor_regreso:
+            t1 = parse_time(order.hor_ida)
+            t2 = parse_time(order.hor_regreso)
+            duracion = (t2 - t1).total_seconds() / 3600
+            if duracion < 0:
+                duracion += 24
+            order.duracion = duracion
+    except:
+        pass
+
+    # ================================
+    # Capacidad (editable también)
+    # ================================
+    if "capacidadu" in payload:
+        order.capacidadu = int(payload["capacidadu"])
+    elif "personas" in payload:
+        order.capacidadu = assign_capacidad(int(payload["personas"]))
+
+    # ================================
+    # SUBTOTAL editable
+    # ================================
+    if "subtotal" in payload:
+        order.subtotal = float(payload["subtotal"])
+    else:
+        engine = PricingEngine(db)
+        service = db.get(Service, order.service_id)
+
+        if service:
+            subtotal, capacidad_asignada = engine.calculate(
+                service_slug=service.slug,
+                pasajeros=order.capacidadu,
+                hora=order.hor_ida
+            )
+            order.capacidadu = capacidad_asignada
+            order.subtotal = subtotal
+        else:
+            order.subtotal = 0
+
+    # ================================
+    # Descuento editable
+    # ================================
+    if "descuento" in payload:
+        order.descuento = float(payload["descuento"])
+
+    # ================================
+    # Abonado editable
+    # ================================
+    if "abonado" in payload:
+        order.abonado = float(payload["abonado"])
+
+    # ================================
+    # Recalcular totales SIEMPRE
+    # ================================
+    order.total = (order.subtotal or 0) - (order.descuento or 0)
+    order.liquidar = order.total - (order.abonado or 0)
+
+    db.commit()
+    db.refresh(order)
+
+    return serialize_order(order)
+
+from sqlalchemy import func, desc
+from datetime import datetime
+
+@private_router.get("/stats")
+def get_orders_stats(db: Session = Depends(get_db)):
+
+    # ================================
+    # 📦 Totales generales
+    # ================================
+
+    total_orders = db.query(func.count(Order.id)).scalar() or 0
+
+    total_facturado = db.query(func.sum(Order.total)).scalar() or 0
+    total_abonado = db.query(func.sum(Order.abonado)).scalar() or 0
+    total_pendiente = db.query(func.sum(Order.liquidar)).scalar() or 0
+    ingresos_brutos = db.query(func.sum(Order.subtotal)).scalar() or 0
+    total_descuentos = db.query(func.sum(Order.descuento)).scalar() or 0
+
+    ticket_promedio = (
+        total_facturado / total_orders
+        if total_orders > 0 else 0
+    )
+
+    porcentaje_prom_descuento = (
+        (total_descuentos / ingresos_brutos) * 100
+        if ingresos_brutos > 0 else 0
+    )
+
+    # ================================
+    # 🚐 Capacidad más solicitada
+    # ================================
+
+    capacidad_top = (
+        db.query(Order.capacidadu, func.count(Order.id).label("count"))
+        .group_by(Order.capacidadu)
+        .order_by(desc("count"))
+        .first()
+    )
+
+    capacidad_mas_solicitada = capacidad_top[0] if capacidad_top else None
+
+    # ================================
+    # 📍 Destino más frecuente
+    # ================================
+
+    destino_top = (
+        db.query(Order.dir_destino, func.count(Order.id).label("count"))
+        .group_by(Order.dir_destino)
+        .order_by(desc("count"))
+        .first()
+    )
+
+    destino_mas_frecuente = destino_top[0] if destino_top else None
+
+    # ================================
+    # 📅 Mes actual
+    # ================================
+
+    now = datetime.utcnow()
+
+    ordenes_mes_actual = (
+        db.query(func.count(Order.id))
+        .filter(
+            func.extract("month", Order.created_at) == now.month,
+            func.extract("year", Order.created_at) == now.year
+        )
+        .scalar()
+        or 0
+    )
+
+    ingresos_mes_actual = (
+        db.query(func.sum(Order.total))
+        .filter(
+            func.extract("month", Order.created_at) == now.month,
+            func.extract("year", Order.created_at) == now.year
+        )
+        .scalar()
+        or 0
+    )
+
+    # ================================
+    # 🎯 Response
+    # ================================
+
+    return {
+        "finanzas": {
+            "total_facturado": round(total_facturado, 2),
+            "total_abonado": round(total_abonado, 2),
+            "total_pendiente": round(total_pendiente, 2),
+            "ingresos_brutos": round(ingresos_brutos, 2),
+            "total_descuentos": round(total_descuentos, 2),
+            "ticket_promedio": round(ticket_promedio, 2),
+            "porcentaje_promedio_descuento": round(porcentaje_prom_descuento, 2),
+        },
+        "operacion": {
+            "total_ordenes": total_orders,
+            "capacidad_mas_solicitada": capacidad_mas_solicitada,
+            "destino_mas_frecuente": destino_mas_frecuente,
+        },
+        "mes_actual": {
+            "ordenes": ordenes_mes_actual,
+            "ingresos": round(ingresos_mes_actual, 2),
+        }
+    }

@@ -1,0 +1,147 @@
+.stats-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.stats-page {
+  padding: 2rem 2.5rem;
+  background: #f8fafc;
+}
+
+/* HEADER */
+.stats-header {
+  margin-bottom: 2rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  p {
+    margin-top: 0.4rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+}
+
+/* ===== KPI GRID ===== */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  h3 {
+    margin: 0.2rem 0 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+}
+
+.kpi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+
+  &.purple {
+    background: #6366f1;
+  }
+
+  &.orange {
+    background: #f97316;
+  }
+
+  &.green {
+    background: #16a34a;
+  }
+
+  &.blue {
+    background: #0ea5e9;
+  }
+}
+
+/* ===== CHARTS ===== */
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.chart-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.05);
+
+  h4 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+/* ===== EXTRA INFO ===== */
+
+.extra-info {
+  margin-top: 2rem;
+  background: #ffffff;
+  padding: 1.2rem 1.4rem;
+  border-radius: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.04);
+
+  div {
+    font-size: 0.9rem;
+  }
+}
+
+/* ===== LOADING ===== */
+
+.stats-loading {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  font-weight: 600;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .stats-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-page {
+    padding: 1.2rem;
+  }
+}

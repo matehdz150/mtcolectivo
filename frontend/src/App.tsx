@@ -5,7 +5,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import SrtVideoPlayer from "./pages/video";
+import Stats from "./pages/Stats";
+import PricesPage from "./pages/Prices";
 
 export default function App() {
   return (
@@ -13,13 +14,13 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/ok" element={<Navigate to="/video" replace />} />
           <Route path="/login" element={<Login />} />
 
           {/* Rutas protegidas */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/video" element={<SrtVideoPlayer />} />
+            <Route path="/stats" element={<Stats />} />
+            <Route path="/prices" element={<PricesPage />} />
           </Route>
 
           <Route path="*" element={<h2>Página no encontrada</h2>} />
