@@ -36,9 +36,15 @@ button, input, textarea, select { font-family: inherit; }
 *::-webkit-scrollbar-track { background: transparent; }
 
 .sileo-dark {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
   color: #fff !important;
 }
 
 .sileo-dark * {
+  text-align: center !important;
   color: #fff !important;
 }

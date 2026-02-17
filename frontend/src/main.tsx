@@ -17,7 +17,7 @@ createRoot(document.getElementById("root")).render(
         },
         autopilot: {
           expand: 500,
-          collapse: 3000,
+          collapse: 1500,
         },
       }}
     />
