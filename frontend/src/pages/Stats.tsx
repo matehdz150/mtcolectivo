@@ -34,8 +34,8 @@ export default function Stats() {
     collapse: 3000,
   }, fill: "black",
   styles: {
-    title: "text-white!",
-    description: "text-white/75!",
+    title: "text-white",
+    description: "text-white/75",
   },},
         error: { title: "Error al cargar estadísticas" },
       })

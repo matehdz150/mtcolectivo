@@ -85,14 +85,19 @@ export default function Dashboard() {
       setLoadingOrders(true);
       const res = await sileo.promise(authFetch(`${API_BASE}/orders`), {
         loading: { title: "Cargando órdenes..." },
-        success: { title: "Listo" , description: 'Ordenes listas',autopilot: {
-    expand: 500,
-    collapse: 3000,
-  }, fill: "black",
-  styles: {
-    title: "text-white!",
-    description: "text-white/75!",
-  }, },
+        success: {
+          title: "Listo",
+          description: "Ordenes listas",
+          autopilot: {
+            expand: 500,
+            collapse: 3000,
+          },
+          fill: "black",
+          styles: {
+            title: "text-white",
+            description: "text-white/75",
+          },
+        },
         error: { title: "Ocurrió un error" },
       });
 

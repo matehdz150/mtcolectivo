@@ -34,8 +34,8 @@ export default function Login() {
           success: { title: "Bienvenido", description: "Sesion iniciada",
           fill: "black",
           styles: {
-            title: "text-white!",
-            description: "text-white/75!",
+            title: "text-white",
+            description: "text-white/75",
           }, },
           error: { title: "Credenciales incorrectas" },
         },
