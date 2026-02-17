@@ -12,13 +12,9 @@ import {
 } from "recharts";
 import { fetchStats } from "../services/orders";
 import Sidebar from "../components/Sidebar";
-import {
-  DollarSign,
-  TrendingUp,
-  Receipt,
-  CreditCard,
-} from "lucide-react";
+import { DollarSign, TrendingUp, Receipt, CreditCard } from "lucide-react";
 import "./Stats.scss";
+import { sileo } from "sileo";
 
 type StatsData = {
   finanzas: any;
@@ -30,9 +26,14 @@ export default function Stats() {
   const [data, setData] = useState<StatsData | null>(null);
 
   useEffect(() => {
-    fetchStats().then(setData);
+    sileo
+      .promise(fetchStats(), {
+        loading: { title: "Cargando estadísticas..." },
+        success: { title: "Datos actualizados" },
+        error: { title: "Error al cargar estadísticas" },
+      })
+      .then(setData);
   }, []);
-
   if (!data)
     return <div className="stats-loading">Cargando estadísticas...</div>;
 
@@ -139,12 +140,7 @@ export default function Stats() {
             <h4>Ingresos vs Descuentos</h4>
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie
-                  data={pieData}
-                  dataKey="value"
-                  outerRadius={85}
-                  label
-                >
+                <Pie data={pieData} dataKey="value" outerRadius={85} label>
                   {pieData.map((_, index) => (
                     <Cell key={index} fill={COLORS[index]} />
                   ))}

@@ -27,6 +27,7 @@ import {
   SlidersHorizontal,
   Users,
 } from "lucide-react";
+import { sileo } from "sileo";
 
 type ApiState = "idle" | "loading" | "done" | "error";
 
@@ -82,7 +83,12 @@ export default function Dashboard() {
   async function loadOrders() {
     try {
       setLoadingOrders(true);
-      const res = await authFetch(`${API_BASE}/orders`);
+      const res = await sileo.promise(authFetch(`${API_BASE}/orders`), {
+        loading: { title: "Cargando órdenes..." },
+        success: { title: "Listo" },
+        error: { title: "Ocurrió un error" },
+      });
+
       const data = await res.json();
       setOrders(data);
       console.log(data);
@@ -399,7 +405,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      <Sidebar onUploadClick={openPicker} />
+      <Sidebar />
 
       <main className="content">
         <header className="content-header">

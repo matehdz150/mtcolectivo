@@ -1,6 +1,7 @@
 import { Order, OrderUpdatePayload } from "@/services/orders";
 import { useEffect, useState } from "react";
 import "./OrderEditor.scss";
+import { sileo } from "sileo";
 
 type OrderEditorProps = {
   open: boolean;
@@ -28,17 +29,14 @@ export default function OrderEditor({
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
 
-    const numericFields = [
-      "subtotal",
-      "descuento",
-      "abonado",
-      "capacidadu",
-    ];
+    const numericFields = ["subtotal", "descuento", "abonado", "capacidadu"];
 
     setForm((prev) => ({
       ...prev,
       [name]: numericFields.includes(name)
-        ? value === "" ? null : Number(value)
+        ? value === ""
+          ? null
+          : Number(value)
         : value,
     }));
   }
@@ -57,7 +55,11 @@ export default function OrderEditor({
       abonado: form.abonado ?? undefined,
     };
 
-    await onSaved(payload);
+    await sileo.promise(onSaved(payload), {
+      loading: { title: "Guardando..." },
+      success: { title: "Orden guardada" },
+      error: { title: "Ocurrió un error" },
+    });
   }
 
   return (
@@ -66,22 +68,42 @@ export default function OrderEditor({
         <h2>Editar orden #{order.id}</h2>
 
         <label>Cliente</label>
-        <input name="nombre" value={form.nombre ?? ""} onChange={handleChange} />
+        <input
+          name="nombre"
+          value={form.nombre ?? ""}
+          onChange={handleChange}
+        />
 
         <label>Fecha</label>
         <input name="fecha" value={form.fecha ?? ""} onChange={handleChange} />
 
         <label>Dirección salida</label>
-        <input name="dir_salida" value={form.dir_salida ?? ""} onChange={handleChange} />
+        <input
+          name="dir_salida"
+          value={form.dir_salida ?? ""}
+          onChange={handleChange}
+        />
 
         <label>Destino</label>
-        <input name="dir_destino" value={form.dir_destino ?? ""} onChange={handleChange} />
+        <input
+          name="dir_destino"
+          value={form.dir_destino ?? ""}
+          onChange={handleChange}
+        />
 
         <label>Hora ida</label>
-        <input name="hor_ida" value={form.hor_ida ?? ""} onChange={handleChange} />
+        <input
+          name="hor_ida"
+          value={form.hor_ida ?? ""}
+          onChange={handleChange}
+        />
 
         <label>Hora regreso</label>
-        <input name="hor_regreso" value={form.hor_regreso ?? ""} onChange={handleChange} />
+        <input
+          name="hor_regreso"
+          value={form.hor_regreso ?? ""}
+          onChange={handleChange}
+        />
 
         <hr />
 

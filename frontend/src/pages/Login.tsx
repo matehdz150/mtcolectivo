@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./Login.scss";
 import { login, isLoggedIn } from "../services/auth";
 import { useAuth } from "../contexts/AuthContext";
+import { sileo } from "sileo";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -26,7 +27,14 @@ export default function Login() {
     setErr(null);
     setLoading(true);
     try {
-      const token = await login({ username: user, password: pass });
+      const token = await sileo.promise(
+        login({ username: user, password: pass }),
+        {
+          loading: { title: "Iniciando sesión..." },
+          success: { title: "Bienvenido" },
+          error: { title: "Credenciales incorrectas" },
+        },
+      );
       setToken(token); // ⬅️ avisa al contexto (sin refrescar)
       // redirección principal
       navigate("/dashboard", { replace: true });
@@ -47,7 +55,11 @@ export default function Login() {
     <div className="login-container">
       <div className="login-wrapper">
         <div className="login-image">
-          <h2>¡Bienvenido<br />de vuelta!</h2>
+          <h2>
+            ¡Bienvenido
+            <br />
+            de vuelta!
+          </h2>
         </div>
 
         <div className="login-card">
@@ -80,7 +92,11 @@ export default function Login() {
               />
             </div>
 
-            {err && <div className="login-error" role="alert">{err}</div>}
+            {err && (
+              <div className="login-error" role="alert">
+                {err}
+              </div>
+            )}
 
             <div className="actions">
               <button type="submit" disabled={loading || !user || !pass}>
