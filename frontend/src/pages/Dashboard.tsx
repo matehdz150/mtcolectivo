@@ -88,15 +88,6 @@ export default function Dashboard() {
         success: {
           title: "Listo",
           description: "Ordenes listas",
-          autopilot: {
-            expand: 500,
-            collapse: 3000,
-          },
-          fill: "black",
-          styles: {
-            title: "text-white",
-            description: "text-white/75",
-          },
         },
         error: { title: "Ocurrió un error" },
       });

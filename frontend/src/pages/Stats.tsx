@@ -29,14 +29,7 @@ export default function Stats() {
     sileo
       .promise(fetchStats(), {
         loading: { title: "Cargando estadísticas..."},
-        success: { title: "Datos actualizados", description: 'Estadisticas cargadas', autopilot: {
-    expand: 500,
-    collapse: 3000,
-  }, fill: "black",
-  styles: {
-    title: "text-white",
-    description: "text-white/75",
-  },},
+        success: { title: "Datos actualizados", description: 'Estadisticas cargadas'},
         error: { title: "Error al cargar estadísticas" },
       })
       .then(setData);
