@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from app.database import Base
-
+from app.database import Base  
 
 class Order(Base):
     __tablename__ = "orders"
@@ -24,7 +23,7 @@ class Order(Base):
     capacidadu = Column(Integer, nullable=True)
 
     # montos
-    subtotal = Column(Float, nullable=True)
+    subtotal = Column(Float, nullable=True)  
     descuento = Column(Float, nullable=True)
     total = Column(Float, nullable=True)
     abonado = Column(Float, nullable=True)

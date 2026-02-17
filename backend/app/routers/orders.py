@@ -13,14 +13,14 @@ from app.schemas import User
 import unicodedata
 
 # ================================
-# 🔐 API KEY para Google Forms
+# API KEY para Google Forms
 # ================================
 FORM_API_KEY = os.getenv("FORM_API_KEY", "super-secret-key")
 
 
 # ================================
-# 🟢 ENDPOINT PÚBLICO PARA GOOGLE FORMS
-# (NO requiere JWT)
+# ENDPOINT PÚBLICO PARA GOOGLE FORMS
+
 # ================================
 public_router = APIRouter(prefix="/orders", tags=["Orders – Public"])
 

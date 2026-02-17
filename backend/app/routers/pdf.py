@@ -15,7 +15,7 @@ from app.main_utils import (
     build_mapping_from_row,
     generate_pdf_from_template,
 )
-from app.deps import get_current_user   # ✅ rutas protegidas
+from app.deps import get_current_user   # rutas protegidas
 from app.schemas import User            # (payload del usuario autenticado)
 
 router = APIRouter(prefix="/pdf", tags=["PDF"])
@@ -81,9 +81,9 @@ async def pdf_from_excel(
         liquidar = total - abonado
 
         # asegúrate de que la plantilla reciba estos tokens actualizados
-        mapping["&SUBTOTAL&"] = f"{subtotal:.2f}"
-        mapping["&TOTAL&"]    = f"{total:.2f}"
-        mapping["&LIQUIDAR&"] = f"{liquidar:.2f}"
+        mapping["&SUBTOTAL&"] = f"{subtotal:,.2f}"
+        mapping["&TOTAL&"]    = f"{total:,.2f}"
+        mapping["&LIQUIDAR&"] = f"{liquidar:,.2f}"
 
         # --- generar PDF ---
         pdf_bytes = generate_pdf_from_template(mapping)
@@ -98,9 +98,9 @@ async def pdf_from_excel(
             hor_regreso=mapping.get("&HOR_REGRESO&"),
             duracion=mapping.get("&DURACION&"),
             capacidadu=mapping.get("&CAPACIDADU&"),
-            subtotal=subtotal,           # 👈 nuevo campo
+            subtotal=subtotal,           
             descuento=descuento,
-            total=total,                 # 👈 total final ya con descuento
+            total=total,                 
             abonado=abonado,
             fecha_abono=mapping.get("&FECHA_ABONO&"),
             liquidar=liquidar,
@@ -166,12 +166,12 @@ async def pdf_from_data(
             "&CAPACIDADU&": g(data, "capacidadu"),
 
             # números formateados
-            "&SUBTOTAL&": f"{subtotal:.2f}",
-            "&DESCUENTO&": f"{descuento:.2f}",
-            "&TOTAL&": f"{total:.2f}",
-            "&ABONADO&": f"{abonado:.2f}",
+            "&SUBTOTAL&": f"{subtotal:,.2f}",
+            "&DESCUENTO&": f"{descuento:,.2f}",
+            "&TOTAL&": f"{total:,.2f}",
+            "&ABONADO&": f"{abonado:,.2f}",
             "&FECHA_ABONO&": g(data, "fecha_abono"),
-            "&LIQUIDAR&": f"{liquidar:.2f}",
+            "&LIQUIDAR&": f"{liquidar:,.2f}",
         }
 
         pdf_bytes = generate_pdf_from_template(mapping)
