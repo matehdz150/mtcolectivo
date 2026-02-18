@@ -5,7 +5,6 @@ from zipfile import ZipFile, ZIP_DEFLATED
 import re, os, tempfile, subprocess
 import pandas as pd
 from docxcompose.composer import Composer
-from mt.backend.app.routers.pdf import generate_docx_from_template
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "../PlantillaOrden.docx")
 
