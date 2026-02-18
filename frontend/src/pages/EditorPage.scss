@@ -1,6 +1,7 @@
 .order-layout {
   background: #f6f7f9;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
   padding: 40px 20px;
   display: flex;
   justify-content: center;
@@ -13,6 +14,7 @@
   border-radius: 14px;
   padding: 40px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  margin-bottom: 40px; // 🔥 importante para que no se corte abajo
 }
 
 .order-header {
