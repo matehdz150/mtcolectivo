@@ -25,16 +25,22 @@ export default function OrderEditPage() {
   // Cargar orden
   // ===============================
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
 
     async function load() {
       try {
-        const data = await getOrderById(Number(id));
+        const orderId = Number(id);
+
+        const data = await getOrderById(orderId);
         setForm(data);
 
-        const extra = await getExtraText(Number(id));
+        const extra = await getExtraText(orderId);
         setTextoExtra(extra.texto_extra ?? "");
-      } catch {
+      } catch (err) {
+        console.error(err);
         sileo.error({ title: "Error cargando orden" });
       } finally {
         setLoading(false);
