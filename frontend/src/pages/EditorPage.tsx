@@ -8,7 +8,7 @@ import {
   deleteExtraText,
   Order,
   OrderUpdatePayload,
-} from "@/services/orders";
+} from "../services/orders";
 import { sileo } from "sileo";
 import "./EditorPage.scss";
 
