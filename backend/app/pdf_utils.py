@@ -1,8 +1,10 @@
 from fastapi.responses import StreamingResponse, PlainTextResponse
+from docx import Document
 from io import BytesIO
 from zipfile import ZipFile, ZIP_DEFLATED
 import re, os, tempfile, subprocess
 import pandas as pd
+from docxcompose.composer import Composer
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "../PlantillaOrden.docx")
 
@@ -106,3 +108,47 @@ def read_first_row_from_excel(file_bytes: bytes, sheet_name: str | None = None) 
         raise ValueError("El Excel no tiene filas.")
     first = df.iloc[0].to_dict()
     return first
+
+EXTRA_TEMPLATE_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "../PlantillaExtra.docx"
+)
+
+def generate_extra_page(texto: str) -> bytes:
+    doc = Document(EXTRA_TEMPLATE_PATH)
+
+    for paragraph in doc.paragraphs:
+        if "&TEXTO_EXTRA&" in paragraph.text:
+            paragraph.text = paragraph.text.replace("&TEXTO_EXTRA&", texto)
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer.read()
+
+def merge_docx(base_bytes: bytes, extra_bytes: bytes) -> bytes:
+    base_doc = Document(BytesIO(base_bytes))
+    composer = Composer(base_doc)
+
+    extra_doc = Document(BytesIO(extra_bytes))
+    composer.append(extra_doc)
+
+    buffer = BytesIO()
+    composer.save(buffer)
+    buffer.seek(0)
+    return buffer.read()
+
+def generate_pdf_from_order(mapping: dict, texto_extra: str | None) -> bytes:
+
+    # 1️⃣ Generar base DOCX
+    base_docx = generate_docx_from_template(mapping)
+
+    final_docx = base_docx
+
+    # 2️⃣ Si hay texto extra → merge
+    if texto_extra and texto_extra.strip():
+        extra_docx = generate_extra_page(texto_extra)
+        final_docx = merge_docx(base_docx, extra_docx)
+
+    # 3️⃣ Convertir resultado final a PDF
+    return docx_to_pdf_bytes(final_docx)

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base  
@@ -29,6 +29,8 @@ class Order(Base):
     abonado = Column(Float, nullable=True)
     fecha_abono = Column(String, nullable=True)
     liquidar = Column(Float, nullable=True)
+
+    texto_extra = Column(Text, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 

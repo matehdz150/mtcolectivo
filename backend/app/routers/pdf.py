@@ -13,7 +13,7 @@ from app.models import Order
 from app.main_utils import (
     read_first_row_from_excel,
     build_mapping_from_row,
-    generate_pdf_from_template,
+    generate_pdf_from_order,
 )
 from app.deps import get_current_user   # rutas protegidas
 from app.schemas import User            # (payload del usuario autenticado)
@@ -142,18 +142,16 @@ async def pdf_from_data(
                     return "" if v is None else str(v)
             return ""
 
-        # leemos strings
-        s_subtotal  = g(data, "subtotal") or g(data, "SUBTOTAL")
-        s_descuento = g(data, "descuento")
-        s_abonado   = g(data, "abonado")
+        # 🔹 Números
+        subtotal  = parse_num(g(data, "subtotal"))
+        descuento = parse_num(g(data, "descuento"))
+        abonado   = parse_num(g(data, "abonado"))
 
-        # parseamos y recalculamos (si no hay datos, 0)
-        subtotal  = parse_num(s_subtotal)
-        descuento = parse_num(s_descuento)
-        abonado   = parse_num(s_abonado)
         total     = subtotal - descuento
         liquidar  = total - abonado
-        
+
+        # 🔹 Texto extra (🔥 aquí está la diferencia)
+        texto_extra = g(data, "texto_extra")
 
         mapping = {
             "&NOMBRE&": g(data, "nombre"),
@@ -164,8 +162,6 @@ async def pdf_from_data(
             "&HOR_REGRESO&": g(data, "hor_regreso"),
             "&DURACION&": g(data, "duracion"),
             "&CAPACIDADU&": g(data, "capacidadu"),
-
-            # números formateados
             "&SUBTOTAL&": f"{subtotal:,.2f}",
             "&DESCUENTO&": f"{descuento:,.2f}",
             "&TOTAL&": f"{total:,.2f}",
@@ -174,12 +170,18 @@ async def pdf_from_data(
             "&LIQUIDAR&": f"{liquidar:,.2f}",
         }
 
-        pdf_bytes = generate_pdf_from_template(mapping)
+        # 🔥 USAMOS LA FUNCIÓN QUE HACE MERGE
+        pdf_bytes = generate_pdf_from_order(
+            mapping=mapping,
+            texto_extra=texto_extra
+        )
+
         return StreamingResponse(
             BytesIO(pdf_bytes),
             media_type="application/pdf",
             headers={"Content-Disposition": 'attachment; filename="orden.pdf"'},
         )
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     

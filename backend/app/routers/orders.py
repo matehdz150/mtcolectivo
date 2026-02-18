@@ -580,3 +580,67 @@ def get_orders_stats(db: Session = Depends(get_db)):
             "ingresos": round(ingresos_mes_actual, 2),
         }
     }
+
+@private_router.put("/orders/{order_id}/extra-text")
+def update_extra_text(
+    order_id: int,
+    payload: Dict[str, str],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    order = db.get(Order, order_id)
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    order.texto_extra = payload.get("texto_extra", "").strip()
+    db.commit()
+    db.refresh(order)
+
+    return {
+        "status": "updated",
+        "order_id": order.id,
+        "texto_extra": order.texto_extra
+    }
+
+@private_router.get("/orders/{order_id}/extra-text")
+def get_extra_text(
+    order_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    order = db.get(Order, order_id)
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    return {
+        "order_id": order.id,
+        "texto_extra": order.texto_extra
+    }
+
+@private_router.delete("/orders/{order_id}/extra-text")
+def delete_extra_text(
+    order_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    order = db.get(Order, order_id)
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    order.texto_extra = None
+    db.commit()
+
+    return {
+        "status": "deleted",
+        "order_id": order.id
+    }
+
+@private_router.get("/{order_id}", response_model=dict)
+def get_order(order_id: int, db: Session = Depends(get_db)):
+    order = db.get(Order, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return serialize_order(order)

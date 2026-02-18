@@ -1,24 +1,6 @@
 // src/services/orders.ts
 import { API_BASE, authFetch } from "./api";
 
-export type Order = {
-  id: number;
-  nombre: string | null;
-  fecha: string | null;
-  dir_salida: string | null;
-  dir_destino: string | null;
-  hor_ida: string | null;
-  hor_regreso: string | null;
-  duracion: string | null;
-  capacidadu: string | null;
-  subtotal: number | null;  // ✅ nuevo
-  descuento: number | null;
-  total: number | null;
-  abonado: number | null;
-  fecha_abono: string | null;
-  liquidar: number | null;
-  created_at: string;
-};
 
 export async function fetchOrders(signal?: AbortSignal): Promise<Order[]> {
   const res = await authFetch(`${API_BASE}/orders/`, { signal });
@@ -88,5 +70,58 @@ export async function wordFromData(
 
 export async function fetchStats(signal?: AbortSignal) {
   const res = await authFetch(`${API_BASE}/orders/stats`, { signal });
+  return res.json();
+}
+
+// src/services/orders.ts
+
+export interface Order {
+  id: number;
+  nombre?: string;
+  fecha?: string;
+  dir_salida?: string;
+  dir_destino?: string;
+  hor_ida?: string;
+  hor_regreso?: string;
+  duracion?: number;
+  capacidadu?: number;
+  subtotal?: number;
+  descuento?: number;
+  total?: number;
+  abonado?: number;
+  fecha_abono?: string;
+  liquidar?: number;
+  texto_extra?: string | null;
+  created_at?: string;
+}
+
+export async function getOrderById(orderId: number): Promise<Order> {
+  const res = await authFetch(`${API_BASE}/orders/${orderId}`);
+
+  const data = await res.json();
+
+  return data as Order;
+}
+
+export async function getExtraText(orderId: number) {
+  const res = await authFetch(`${API_BASE}/orders/${orderId}/extra-text`);
+  return res.json();
+}
+
+export async function updateExtraText(orderId: number, texto: string) {
+  const res = await authFetch(`${API_BASE}/orders/${orderId}/extra-text`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ texto_extra: texto }),
+  });
+
+  return res.json();
+}
+
+export async function deleteExtraText(orderId: number) {
+  const res = await authFetch(`${API_BASE}/orders/${orderId}/extra-text`, {
+    method: "DELETE",
+  });
+
   return res.json();
 }

@@ -6,6 +6,7 @@ import Modal, { type ModalStatus } from "../components/Modal";
 import PdfPreview from "../components/PdfPreview";
 import { uploadExcel, ApiError, authFetch, API_BASE } from "../services/api";
 import OrderEditor from "../components/OrderEditor";
+import { useNavigate } from "react-router-dom";
 import {
   deleteOrder,
   fetchOrders,
@@ -46,6 +47,8 @@ export default function Dashboard() {
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+
+  const navigate = useNavigate();
 
   // Abre el modal de edición
   function openEditor(order: any) {
@@ -406,6 +409,10 @@ export default function Dashboard() {
       return filters.sortDir === "asc" ? result : -result;
     });
 
+  function goToOrder(id: number) {
+    navigate(`/order/${id}`);
+  }
+
   return (
     <div className="dashboard">
       <Sidebar />
@@ -615,7 +622,7 @@ export default function Dashboard() {
 
                   <button
                     className="icon-chip"
-                    onClick={() => openEditor(o)}
+                    onClick={() => goToOrder(o.id)}
                     aria-label="Editar"
                   >
                     ✏️

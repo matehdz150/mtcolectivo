@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Stats from "./pages/Stats";
 import PricesPage from "./pages/Prices";
+import OrderEditPage from "./pages/EditorPage";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/stats" element={<Stats />} />
             <Route path="/prices" element={<PricesPage />} />
+            <Route path="/order/:id" element={<OrderEditPage />} />
           </Route>
 
           <Route path="*" element={<h2>Página no encontrada</h2>} />
