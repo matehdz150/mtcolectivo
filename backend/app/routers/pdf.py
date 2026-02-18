@@ -13,8 +13,8 @@ from app.models import Order
 from app.main_utils import (
     read_first_row_from_excel,
     build_mapping_from_row,
-    generate_pdf_from_order,
 )
+from app.pdf_utils import generate_pdf_from_order
 from app.deps import get_current_user   # rutas protegidas
 from app.schemas import User            # (payload del usuario autenticado)
 
