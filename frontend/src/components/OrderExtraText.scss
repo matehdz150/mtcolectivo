@@ -1,0 +1,24 @@
+.extra-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.status {
+  font-size: 13px;
+  color: #666;
+}
+
+.template-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+textarea {
+  min-height: 260px;
+  font-family: monospace;
+  line-height: 1.6;
+}

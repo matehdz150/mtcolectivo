@@ -11,6 +11,8 @@ import {
 } from "../services/orders";
 import { sileo } from "sileo";
 import "./EditorPage.scss";
+import OrderExtraText from "../components/OrderExtraText";
+import Sidebar from "@/components/Sidebar";
 
 export default function OrderEditPage() {
   const navigate = useNavigate();
@@ -124,6 +126,7 @@ export default function OrderEditPage() {
 
   return (
     <div className="order-layout">
+        <Sidebar/>
       <div className="order-card">
         {/* HEADER */}
         <div className="order-header">
@@ -256,26 +259,7 @@ export default function OrderEditPage() {
         </section>
 
         {/* ================= TEXTO EXTRA ================= */}
-        <section className="section">
-          <h2>Texto adicional (Segunda página)</h2>
-
-          <div className="form-group full">
-            <textarea
-              value={textoExtra}
-              onChange={(e) => setTextoExtra(e.target.value)}
-              placeholder="Este texto se agregará como segunda hoja del PDF..."
-            />
-          </div>
-
-          <div className="inline-actions">
-            <button className="btn-primary" onClick={saveExtraText}>
-              Guardar texto
-            </button>
-            <button className="btn-danger" onClick={removeExtraText}>
-              Eliminar texto
-            </button>
-          </div>
-        </section>
+        <OrderExtraText orderId={safeForm.id} initialValue={textoExtra} />
       </div>
     </div>
   );
