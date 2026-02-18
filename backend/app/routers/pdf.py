@@ -11,7 +11,6 @@ from docxcompose.composer import Composer
 from app.database import SessionLocal
 from app.models import Order
 from app.pdf_utils import docx_to_pdf_bytes
-from app.pdf_utils import generate_pdf_from_order
 from app.deps import get_current_user   # rutas protegidas
 from app.schemas import User            # (payload del usuario autenticado)
 from docx import Document
@@ -51,7 +50,20 @@ def parse_num(val: Any) -> float:
     except ValueError:
         return 0.0
 
+def generate_pdf_from_order(mapping: dict, texto_extra: str | None) -> bytes:
 
+    # 1️⃣ Generar base DOCX
+    base_docx = generate_docx_from_template(mapping)
+
+    final_docx = base_docx
+
+    # 2️⃣ Si hay texto extra → merge
+    if texto_extra and texto_extra.strip():
+        extra_docx = generate_extra_page(texto_extra)
+        final_docx = merge_docx(base_docx, extra_docx)
+
+    # 3️⃣ Convertir resultado final a PDF
+    return docx_to_pdf_bytes(final_docx)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # POST /pdf/from-data  → Genera PDF desde JSON (NO guarda en DB)
@@ -185,20 +197,6 @@ def merge_docx(base_bytes: bytes, extra_bytes: bytes) -> bytes:
     buffer.seek(0)
     return buffer.read()
 
-def generate_pdf_from_order(mapping: dict, texto_extra: str | None) -> bytes:
-
-    # 1️⃣ Generar base DOCX
-    base_docx = generate_docx_from_template(mapping)
-
-    final_docx = base_docx
-
-    # 2️⃣ Si hay texto extra → merge
-    if texto_extra and texto_extra.strip():
-        extra_docx = generate_extra_page(texto_extra)
-        final_docx = merge_docx(base_docx, extra_docx)
-
-    # 3️⃣ Convertir resultado final a PDF
-    return docx_to_pdf_bytes(final_docx)
     
 @router.post("/from-data-word")
 async def word_from_data(
