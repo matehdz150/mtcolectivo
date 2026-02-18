@@ -15,6 +15,8 @@ from app.deps import get_current_user   # rutas protegidas
 from app.schemas import User            # (payload del usuario autenticado)
 from docx import Document
 from io import BytesIO
+from app.pdf_utils import fill_docx_with_mapping
+from app.pdf_utils import TEMPLATE_PATH
 
 router = APIRouter(prefix="/pdf", tags=["PDF"])
 
@@ -150,23 +152,13 @@ def _replace_tokens_in_paragraph(paragraph, mapping: dict) -> None:
 
 
 def generate_docx_from_template(mapping: dict) -> bytes:
-    doc = Document("PlantillaOrden.docx")
+    if not os.path.exists(TEMPLATE_PATH):
+        raise FileNotFoundError("No se encontró la plantilla")
 
-    # Párrafos normales
-    for paragraph in doc.paragraphs:
-        _replace_tokens_in_paragraph(paragraph, mapping)
+    with open(TEMPLATE_PATH, "rb") as f:
+        tpl_bytes = f.read()
 
-    # Tablas (las celdas tienen párrafos)
-    for table in doc.tables:
-        for row in table.rows:
-            for cell in row.cells:
-                for paragraph in cell.paragraphs:
-                    _replace_tokens_in_paragraph(paragraph, mapping)
-
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-    return buffer.read()
+    return fill_docx_with_mapping(tpl_bytes, mapping)
 
 EXTRA_TEMPLATE_PATH = os.path.join(
     os.path.dirname(__file__),
