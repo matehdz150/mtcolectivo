@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import {
   getOrderById,
   updateOrder,
@@ -13,9 +13,8 @@ import { sileo } from "sileo";
 import "./EditorPage.scss";
 
 export default function OrderEditPage() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const id = searchParams.get("id");
+  const { id } = useParams();
 
   const [form, setForm] = useState<Order | null>(null);
   const [textoExtra, setTextoExtra] = useState("");
