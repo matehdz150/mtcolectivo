@@ -4,7 +4,9 @@ from app.services.pricing_engine import PricingEngine
 from sqlalchemy.orm import Session
 from datetime import timezone
 import os
-from sqlalchemy import text
+from typing import Dict
+from sqlalchemy import func, desc, text
+from datetime import datetime
 
 from app.database import SessionLocal
 from app.models import Order, Service
@@ -476,8 +478,6 @@ def update_order(order_id: int, payload: dict, db: Session = Depends(get_db)):
 
     return serialize_order(order)
 
-from sqlalchemy import func, desc
-from datetime import datetime
 
 @private_router.get("/stats")
 def get_orders_stats(db: Session = Depends(get_db)):
