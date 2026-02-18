@@ -4,16 +4,19 @@
 
 .dashboard-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;          // altura fija para scroll interno
   background: #f6f7f9;
+  overflow: hidden;       // evita doble scroll
 }
 
-/* ⚠️ Ajusta el width si tu Sidebar usa otro ancho */
+/* Sidebar ya ocupa su ancho natural */
+
 .dashboard-content {
-  flex: 1;
-  margin-left: 260px; 
-  padding: 40px 40px 80px;
-  overflow-y: auto;
+  flex: 1;                // 🔥 ocupa TODO el espacio restante
+  padding: 40px;
+  overflow-y: auto;       // 🔥 scroll aquí
+  display: flex;
+  justify-content: center; // centra la card
 }
 
 /* ============================= */
@@ -21,9 +24,8 @@
 /* ============================= */
 
 .order-card {
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
+  width: 100%;            // 🔥 ocupa todo el ancho disponible
+  max-width: none;        // 🔥 quitamos límite
   background: white;
   border-radius: 14px;
   padding: 40px;
