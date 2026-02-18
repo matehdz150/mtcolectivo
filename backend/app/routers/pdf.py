@@ -7,7 +7,7 @@ import os
 import subprocess
 import re
 from typing import Any, Dict
-
+from docxcompose.composer import Composer
 from app.database import SessionLocal
 from app.models import Order
 from app.pdf_utils import docx_to_pdf_bytes
@@ -158,7 +158,7 @@ def generate_docx_from_template(mapping: dict) -> bytes:
 
 EXTRA_TEMPLATE_PATH = os.path.join(
     os.path.dirname(__file__),
-    "../PlantillaExtra.docx"
+    "../../PlantillaExtra.docx"
 )
 
 def generate_extra_page(texto: str) -> bytes:
