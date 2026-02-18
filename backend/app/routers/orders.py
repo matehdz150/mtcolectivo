@@ -329,6 +329,7 @@ def serialize_order(o: Order) -> dict:
         "abonado": o.abonado,
         "fecha_abono": o.fecha_abono,
         "liquidar": o.liquidar,
+        "texto_extra": o.texto_extra,
         "created_at": created_iso,
     }
 
