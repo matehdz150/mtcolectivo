@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "./PdfPreview.scss";
 
@@ -17,6 +17,8 @@ export default function PdfPreview({
   title = "Vista previa",
   onClose,
 }: PdfPreviewProps) {
+  const [numPages, setNumPages] = useState<number>(0);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -47,9 +49,21 @@ export default function PdfPreview({
 
         {url ? (
           <div className="pdfpv-scroll">
-            <Document file={url}>
-              {/* Renderiza TODAS las páginas automáticamente */}
-              <AllPages />
+            <Document
+              file={url}
+              onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+            >
+              {Array.from({ length: numPages }, (_, index) => (
+                <Page
+                  key={`page_${index + 1}`}
+                  pageNumber={index + 1}
+                  width={
+                    window.innerWidth < 768
+                      ? window.innerWidth - 40
+                      : 900
+                  }
+                />
+              ))}
             </Document>
           </div>
         ) : (
@@ -57,21 +71,5 @@ export default function PdfPreview({
         )}
       </div>
     </div>
-  );
-}
-
-function AllPages() {
-  const pages = 10; // no importa, se ajusta automáticamente
-
-  return (
-    <>
-      {Array.from(new Array(pages), (_, i) => (
-        <Page
-          key={`page_${i + 1}`}
-          pageNumber={i + 1}
-          width={window.innerWidth < 768 ? window.innerWidth - 40 : 900}
-        />
-      ))}
-    </>
   );
 }
