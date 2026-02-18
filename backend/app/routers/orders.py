@@ -581,7 +581,7 @@ def get_orders_stats(db: Session = Depends(get_db)):
         }
     }
 
-@private_router.put("/orders/{order_id}/extra-text")
+@private_router.put("/{order_id}/extra-text")
 def update_extra_text(
     order_id: int,
     payload: Dict[str, str],
@@ -603,7 +603,7 @@ def update_extra_text(
         "texto_extra": order.texto_extra
     }
 
-@private_router.get("/orders/{order_id}/extra-text")
+@private_router.get("/{order_id}/extra-text")
 def get_extra_text(
     order_id: int,
     db: Session = Depends(get_db),
@@ -619,7 +619,7 @@ def get_extra_text(
         "texto_extra": order.texto_extra
     }
 
-@private_router.delete("/orders/{order_id}/extra-text")
+@private_router.delete("/{order_id}/extra-text")
 def delete_extra_text(
     order_id: int,
     db: Session = Depends(get_db),
