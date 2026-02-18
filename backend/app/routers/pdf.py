@@ -17,6 +17,7 @@ from docx import Document
 from io import BytesIO
 from app.pdf_utils import fill_docx_with_mapping
 from app.pdf_utils import TEMPLATE_PATH
+from docx.enum.section import WD_SECTION
 
 router = APIRouter(prefix="/pdf", tags=["PDF"])
 
@@ -182,6 +183,10 @@ def generate_extra_page(texto: str) -> bytes:
 
 def merge_docx(base_bytes: bytes, extra_bytes: bytes) -> bytes:
     base_doc = Document(BytesIO(base_bytes))
+
+    # 🔥 FORZAR NUEVA SECCIÓN EN NUEVA PÁGINA
+    base_doc.add_section(WD_SECTION.NEW_PAGE)
+
     composer = Composer(base_doc)
 
     extra_doc = Document(BytesIO(extra_bytes))
