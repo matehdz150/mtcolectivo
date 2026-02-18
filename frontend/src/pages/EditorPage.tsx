@@ -125,144 +125,143 @@ export default function OrderEditPage() {
   }
 
   return (
-    <>
-    <Sidebar/>
-    <div className="order-layout">
-      <div className="order-card">
-        {/* HEADER */}
-        <div className="order-header">
-          <h1>Editar Orden #{safeForm.id}</h1>
+    <div className="dashboard-layout">
+      <Sidebar />
 
-          <div className="header-actions">
-            <button
-              className="btn-secondary"
-              onClick={() => navigate("/orders")}
-            >
-              Cancelar
-            </button>
-            <button className="btn-primary" onClick={saveOrder}>
-              Guardar
-            </button>
+      <div className="dashboard-content">
+        <div className="order-card">
+          {/* HEADER */}
+          <div className="order-header">
+            <h1>Editar Orden #{safeForm.id}</h1>
+
+            <div className="header-actions">
+              <button
+                className="btn-secondary"
+                onClick={() => navigate("/orders")}
+              >
+                Cancelar
+              </button>
+              <button className="btn-primary" onClick={saveOrder}>
+                Guardar
+              </button>
+            </div>
           </div>
+
+          {/* SECCIONES */}
+          <section className="section">
+            <h2>Detalles del servicio</h2>
+
+            <div className="form-group full">
+              <label>Nombre del cliente</label>
+              <input
+                name="nombre"
+                value={safeForm.nombre ?? ""}
+                onChange={handleChange}
+                placeholder="Ej. Juan Pérez"
+              />
+            </div>
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label>Fecha</label>
+                <input
+                  name="fecha"
+                  value={safeForm.fecha ?? ""}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Capacidad</label>
+                <input
+                  type="number"
+                  name="capacidadu"
+                  value={safeForm.capacidadu ?? ""}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label>Dirección salida</label>
+                <input
+                  name="dir_salida"
+                  value={safeForm.dir_salida ?? ""}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Destino</label>
+                <input
+                  name="dir_destino"
+                  value={safeForm.dir_destino ?? ""}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label>Hora ida</label>
+                <input
+                  name="hor_ida"
+                  value={safeForm.hor_ida ?? ""}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Hora regreso</label>
+                <input
+                  name="hor_regreso"
+                  value={safeForm.hor_regreso ?? ""}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="section">
+            <h2>Precios y pagos</h2>
+
+            <div className="grid-3">
+              <div className="form-group">
+                <label>Subtotal</label>
+                <input
+                  type="number"
+                  name="subtotal"
+                  value={safeForm.subtotal ?? ""}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Descuento</label>
+                <input
+                  type="number"
+                  name="descuento"
+                  value={safeForm.descuento ?? ""}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Abonado</label>
+                <input
+                  type="number"
+                  name="abonado"
+                  value={safeForm.abonado ?? ""}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </section>
+
+          <OrderExtraText orderId={safeForm.id} initialValue={textoExtra} />
         </div>
-
-        {/* ================= DATOS GENERALES ================= */}
-        <section className="section">
-          <h2>Detalles del servicio</h2>
-
-          <div className="form-group full">
-            <label>Nombre del cliente</label>
-            <input
-              name="nombre"
-              value={safeForm.nombre ?? ""}
-              onChange={handleChange}
-              placeholder="Ej. Juan Pérez"
-            />
-          </div>
-
-          <div className="grid-2">
-            <div className="form-group">
-              <label>Fecha</label>
-              <input
-                name="fecha"
-                value={safeForm.fecha ?? ""}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Capacidad</label>
-              <input
-                type="number"
-                name="capacidadu"
-                value={safeForm.capacidadu ?? ""}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="grid-2">
-            <div className="form-group">
-              <label>Dirección salida</label>
-              <input
-                name="dir_salida"
-                value={safeForm.dir_salida ?? ""}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Destino</label>
-              <input
-                name="dir_destino"
-                value={safeForm.dir_destino ?? ""}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="grid-2">
-            <div className="form-group">
-              <label>Hora ida</label>
-              <input
-                name="hor_ida"
-                value={safeForm.hor_ida ?? ""}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Hora regreso</label>
-              <input
-                name="hor_regreso"
-                value={safeForm.hor_regreso ?? ""}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ================= FINANZAS ================= */}
-        <section className="section">
-          <h2>Precios y pagos</h2>
-
-          <div className="grid-3">
-            <div className="form-group">
-              <label>Subtotal</label>
-              <input
-                type="number"
-                name="subtotal"
-                value={safeForm.subtotal ?? ""}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Descuento</label>
-              <input
-                type="number"
-                name="descuento"
-                value={safeForm.descuento ?? ""}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Abonado</label>
-              <input
-                type="number"
-                name="abonado"
-                value={safeForm.abonado ?? ""}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ================= TEXTO EXTRA ================= */}
-        <OrderExtraText orderId={safeForm.id} initialValue={textoExtra} />
       </div>
     </div>
-    </>
   );
 }

@@ -10,13 +10,12 @@ from typing import Any, Dict
 
 from app.database import SessionLocal
 from app.models import Order
-from app.main_utils import (
-    read_first_row_from_excel,
-    build_mapping_from_row,
-)
+from app.pdf_utils import docx_to_pdf_bytes
 from app.pdf_utils import generate_pdf_from_order
 from app.deps import get_current_user   # rutas protegidas
 from app.schemas import User            # (payload del usuario autenticado)
+from docx import Document
+from io import BytesIO
 
 router = APIRouter(prefix="/pdf", tags=["PDF"])
 
@@ -52,75 +51,6 @@ def parse_num(val: Any) -> float:
     except ValueError:
         return 0.0
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# POST /pdf/from-excel  → Genera PDF + guarda la orden en DB
-# Usa &SUBTOTAL&, &DESCUENTO&, &ABONADO& para calcular:
-#   TOTAL   = SUBTOTAL - DESCUENTO
-#   LIQUIDAR = TOTAL - ABONADO
-# Y en la plantilla rellena &SUBTOTAL&, &TOTAL&, &LIQUIDAR& (además de los demás).
-# ─────────────────────────────────────────────────────────────────────────────
-@router.post("/from-excel")
-async def pdf_from_excel(
-    file: UploadFile = File(...),
-    sheet: str | None = Form(None),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),  # ✅ protegido
-):
-    try:
-        xls_bytes = await file.read()
-        row = read_first_row_from_excel(xls_bytes, sheet_name=sheet)
-        mapping = build_mapping_from_row(row)
-
-        # --- números base ---
-        subtotal  = parse_num(mapping.get("&SUBTOTAL&"))
-        descuento = parse_num(mapping.get("&DESCUENTO&"))
-        abonado   = parse_num(mapping.get("&ABONADO&"))
-
-        total    = subtotal - descuento
-        liquidar = total - abonado
-
-        # asegúrate de que la plantilla reciba estos tokens actualizados
-        mapping["&SUBTOTAL&"] = f"{subtotal:,.2f}"
-        mapping["&TOTAL&"]    = f"{total:,.2f}"
-        mapping["&LIQUIDAR&"] = f"{liquidar:,.2f}"
-
-        # --- generar PDF ---
-        pdf_bytes = generate_pdf_from_template(mapping)
-
-        # --- guardar orden ---
-        order = Order(
-            nombre=mapping.get("&NOMBRE&"),
-            fecha=mapping.get("&FECHA&"),
-            dir_salida=mapping.get("&DIR_SALIDA&"),
-            dir_destino=mapping.get("&DIR_DESTINO&"),
-            hor_ida=mapping.get("&HOR_IDA&"),
-            hor_regreso=mapping.get("&HOR_REGRESO&"),
-            duracion=mapping.get("&DURACION&"),
-            capacidadu=mapping.get("&CAPACIDADU&"),
-            subtotal=subtotal,           
-            descuento=descuento,
-            total=total,                 
-            abonado=abonado,
-            fecha_abono=mapping.get("&FECHA_ABONO&"),
-            liquidar=liquidar,
-        )
-        db.add(order)
-        db.commit()
-
-        filename = f'orden_{os.path.splitext(file.filename or "archivo")[0]}.pdf'
-        return StreamingResponse(
-            BytesIO(pdf_bytes),
-            media_type="application/pdf",
-            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-        )
-    except subprocess.CalledProcessError as e:
-        return PlainTextResponse(
-            f"Error LibreOffice: {e.stderr.decode('utf-8', errors='ignore')}",
-            status_code=500,
-        )
-    except Exception as e:
-        return PlainTextResponse(str(e), status_code=500)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -185,8 +115,6 @@ async def pdf_from_data(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-from docx import Document
-from io import BytesIO
 
 def _replace_tokens_in_paragraph(paragraph, mapping: dict) -> None:
     # Une runs -> reemplaza sobre el texto completo -> reescribe
@@ -227,6 +155,50 @@ def generate_docx_from_template(mapping: dict) -> bytes:
     doc.save(buffer)
     buffer.seek(0)
     return buffer.read()
+
+EXTRA_TEMPLATE_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "../PlantillaExtra.docx"
+)
+
+def generate_extra_page(texto: str) -> bytes:
+    doc = Document(EXTRA_TEMPLATE_PATH)
+
+    for paragraph in doc.paragraphs:
+        if "&TEXTO_EXTRA&" in paragraph.text:
+            paragraph.text = paragraph.text.replace("&TEXTO_EXTRA&", texto)
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer.read()
+
+def merge_docx(base_bytes: bytes, extra_bytes: bytes) -> bytes:
+    base_doc = Document(BytesIO(base_bytes))
+    composer = Composer(base_doc)
+
+    extra_doc = Document(BytesIO(extra_bytes))
+    composer.append(extra_doc)
+
+    buffer = BytesIO()
+    composer.save(buffer)
+    buffer.seek(0)
+    return buffer.read()
+
+def generate_pdf_from_order(mapping: dict, texto_extra: str | None) -> bytes:
+
+    # 1️⃣ Generar base DOCX
+    base_docx = generate_docx_from_template(mapping)
+
+    final_docx = base_docx
+
+    # 2️⃣ Si hay texto extra → merge
+    if texto_extra and texto_extra.strip():
+        extra_docx = generate_extra_page(texto_extra)
+        final_docx = merge_docx(base_docx, extra_docx)
+
+    # 3️⃣ Convertir resultado final a PDF
+    return docx_to_pdf_bytes(final_docx)
     
 @router.post("/from-data-word")
 async def word_from_data(
