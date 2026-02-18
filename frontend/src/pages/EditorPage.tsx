@@ -125,8 +125,9 @@ export default function OrderEditPage() {
   }
 
   return (
+    <>
+    <Sidebar/>
     <div className="order-layout">
-        <Sidebar/>
       <div className="order-card">
         {/* HEADER */}
         <div className="order-header">
@@ -262,5 +263,6 @@ export default function OrderEditPage() {
         <OrderExtraText orderId={safeForm.id} initialValue={textoExtra} />
       </div>
     </div>
+    </>
   );
 }
