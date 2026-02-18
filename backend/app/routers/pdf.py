@@ -168,6 +168,9 @@ EXTRA_TEMPLATE_PATH = os.path.join(
 def generate_extra_page(texto: str) -> bytes:
     doc = Document(EXTRA_TEMPLATE_PATH)
 
+    # 🔥 FORZAR NUEVA PÁGINA AL INICIO
+    doc.paragraphs[0].insert_paragraph_before().add_run().add_break()
+
     for paragraph in doc.paragraphs:
         if "&TEXTO_EXTRA&" in paragraph.text:
             paragraph.text = paragraph.text.replace("&TEXTO_EXTRA&", texto)
