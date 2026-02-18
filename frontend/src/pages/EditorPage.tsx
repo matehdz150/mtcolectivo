@@ -12,7 +12,7 @@ import {
 import { sileo } from "sileo";
 import "./EditorPage.scss";
 import OrderExtraText from "../components/OrderExtraText";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "../components/Sidebar";
 
 export default function OrderEditPage() {
   const navigate = useNavigate();
