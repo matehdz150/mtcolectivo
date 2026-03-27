@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createOrderManual } from "../services/orders";
 import { sileo } from "sileo";
-import './NewOrder.scss';
+import "./NewOrder.scss";
 import Sidebar from "../components/Sidebar";
 
 export default function OrderCreatePage() {
@@ -104,6 +104,7 @@ export default function OrderCreatePage() {
               <div className="form-group">
                 <label>Fecha</label>
                 <input
+                  type="date"
                   name="fecha"
                   value={form.fecha}
                   onChange={handleChange}
