@@ -7,10 +7,12 @@ import {
   deleteServicePrice,
   Service,
   ServicePrice,
+  createService,
 } from "../services/prices";
 
 import "./Prices.scss";
 import Sidebar from "../components/Sidebar";
+import { Plus } from "lucide-react";
 
 export default function PricesPage() {
   const [services, setServices] = useState<Service[]>([]);
@@ -90,13 +92,29 @@ export default function PricesPage() {
     if (selectedService) loadPrices(selectedService.id);
   }
 
+  async function handleCreateService() {
+    const name = prompt("Nombre del servicio:");
+    if (!name) return;
+
+    const slug = name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+    const newService = await createService({ name, slug });
+
+    // refrescar lista
+    setServices((prev) => [...prev, newService]);
+    setSelectedService(newService);
+  }
+
   return (
     <div className="prices-layout">
       <Sidebar />
 
       <div className="prices-page">
         <div className="prices-container">
-
           {/* HEADER */}
           <div className="prices-header">
             <div>
@@ -104,22 +122,32 @@ export default function PricesPage() {
               <p>Administra tarifas dinámicas por capacidad y periodo</p>
             </div>
 
-            <select
-              className="service-select"
-              value={selectedService?.id || ""}
-              onChange={(e) => {
-                const service = services.find(
-                  (s) => s.id === Number(e.target.value)
-                );
-                setSelectedService(service || null);
-              }}
-            >
-              {services.map((service) => (
-                <option key={service.id} value={service.id}>
-                  {service.name} ({service.slug})
-                </option>
-              ))}
-            </select>
+            <div className="service-actions">
+              <select
+                className="service-select"
+                value={selectedService?.id || ""}
+                onChange={(e) => {
+                  const service = services.find(
+                    (s) => s.id === Number(e.target.value),
+                  );
+                  setSelectedService(service || null);
+                }}
+              >
+                {services.map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.name} ({service.slug})
+                  </option>
+                ))}
+              </select>
+
+              <button
+                className="btn-create-service"
+                onClick={handleCreateService}
+              >
+                <Plus size={16} />
+                Nuevo servicio
+              </button>
+            </div>
           </div>
 
           {/* FORM */}
@@ -139,9 +167,7 @@ export default function PricesPage() {
 
                 <select
                   value={form.period}
-                  onChange={(e) =>
-                    setForm({ ...form, period: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, period: e.target.value })}
                 >
                   <option value="morning">Morning</option>
                   <option value="afternoon">Afternoon</option>
@@ -197,7 +223,11 @@ export default function PricesPage() {
                           type="number"
                           defaultValue={price.capacidad}
                           onBlur={(e) =>
-                            handleUpdate(price.id, "capacidad", Number(e.target.value))
+                            handleUpdate(
+                              price.id,
+                              "capacidad",
+                              Number(e.target.value),
+                            )
                           }
                         />
                       </td>
@@ -220,7 +250,11 @@ export default function PricesPage() {
                           type="number"
                           defaultValue={price.price_normal}
                           onBlur={(e) =>
-                            handleUpdate(price.id, "price_normal", Number(e.target.value))
+                            handleUpdate(
+                              price.id,
+                              "price_normal",
+                              Number(e.target.value),
+                            )
                           }
                         />
                       </td>
@@ -230,7 +264,11 @@ export default function PricesPage() {
                           type="number"
                           defaultValue={price.price_discount ?? ""}
                           onBlur={(e) =>
-                            handleUpdate(price.id, "price_discount", Number(e.target.value))
+                            handleUpdate(
+                              price.id,
+                              "price_discount",
+                              Number(e.target.value),
+                            )
                           }
                         />
                       </td>
@@ -257,7 +295,6 @@ export default function PricesPage() {
               </table>
             )}
           </div>
-
         </div>
       </div>
     </div>

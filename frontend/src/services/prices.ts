@@ -68,3 +68,18 @@ export async function getServices(): Promise<Service[]> {
   const res = await authFetch(`${API_BASE}/service-prices/services`);
   return res.json();
 }
+
+export async function createService(data: {
+  name: string;
+  slug: string;
+}): Promise<Service> {
+  const res = await authFetch(`${API_BASE}/service-prices/services`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  return await res.json();
+}
