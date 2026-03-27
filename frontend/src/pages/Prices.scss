@@ -267,3 +267,50 @@ tr:hover {
     max-height: 350px;
   }
 }
+
+/* ============================= */
+/* SERVICE ACTIONS */
+/* ============================= */
+
+.service-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.service-select {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e4e8;
+  font-size: 14px;
+}
+
+/* ============================= */
+/* CREATE SERVICE BUTTON */
+/* ============================= */
+
+.btn-create-service {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  background: #111;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  svg {
+    stroke-width: 2.5;
+  }
+
+  &:hover {
+    background: #000;
+    transform: translateY(-1px);
+  }
+}
