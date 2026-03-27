@@ -24,6 +24,7 @@ import {
   ArrowUp,
   Calendar,
   DollarSign,
+  Plus,
   Search,
   SlidersHorizontal,
   Users,
@@ -557,7 +558,17 @@ export default function Dashboard() {
 
         {/* ===== ÓRDENES: Tabla Pro ===== */}
         <section className="orders-pro">
-          <h3>Órdenes recientes</h3>
+          <div className="orders-pro__top">
+            <h3>Órdenes recientes</h3>
+
+            <button
+              className="btn-create-order"
+              onClick={() => navigate("/newOrder")}
+            >
+              <Plus size={16} />
+              Nueva orden
+            </button>
+          </div>
 
           {/* Encabezado fijo */}
           <div className="orders-pro__head">

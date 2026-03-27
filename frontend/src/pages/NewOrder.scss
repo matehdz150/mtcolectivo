@@ -1,0 +1,249 @@
+/* ============================= */
+/* LAYOUT */
+/* ============================= */
+
+.create-layout {
+  display: flex;
+  height: 100vh;
+  background: #f4f6f8;
+  overflow: hidden;
+}
+
+.create-content {
+  flex: 1;
+  padding: 48px;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================= */
+/* CARD */
+/* ============================= */
+
+.create-card {
+  width: 100%;
+  max-width: 1200px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 48px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+  border: 1px solid #eef0f2;
+}
+
+/* ============================= */
+/* HEADER */
+/* ============================= */
+
+.create-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 48px;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #111;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+}
+
+.create-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ============================= */
+/* SECTIONS */
+/* ============================= */
+
+.create-section {
+  margin-bottom: 52px;
+
+  h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 20px;
+    letter-spacing: 0.2px;
+  }
+}
+
+/* ============================= */
+/* GRID */
+/* ============================= */
+
+.grid-2-create {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.grid-3-create {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 18px;
+}
+
+/* ============================= */
+/* FORM */
+/* ============================= */
+
+.create-group {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 6px;
+  }
+
+  input,
+  textarea {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-size: 14px;
+    background: #fafafa;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #d1d5db;
+      background: #fff;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #111;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+    }
+  }
+
+  textarea {
+    min-height: 130px;
+    resize: vertical;
+  }
+}
+
+.full-create {
+  grid-column: span 2;
+}
+
+/* ============================= */
+/* BUTTONS */
+/* ============================= */
+
+.btn-primary-create {
+  background: #111;
+  color: white;
+  border: none;
+  padding: 11px 20px;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #000;
+    transform: translateY(-1px);
+  }
+}
+
+.btn-secondary-create {
+  background: #f3f4f6;
+  border: none;
+  padding: 11px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover {
+    background: #e5e7eb;
+  }
+}
+
+/* ============================= */
+/* MOBILE */
+/* ============================= */
+
+@media (max-width: 768px) {
+
+  .create-layout {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .create-content {
+    padding: 20px;
+  }
+
+  .create-card {
+    padding: 24px;
+  }
+
+  .create-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .create-actions {
+    width: 100%;
+  }
+
+  .create-actions button {
+    flex: 1;
+  }
+
+  .grid-2-create,
+  .grid-3-create {
+    grid-template-columns: 1fr;
+  }
+
+  .full-create {
+    grid-column: span 1;
+  }
+}
+
+/* ============================= */
+/* TABLET */
+/* ============================= */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  .create-content {
+    padding: 30px;
+  }
+
+  .create-card {
+    padding: 32px;
+  }
+
+  .grid-3-create {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ============================= */
+/* LARGE */
+/* ============================= */
+
+@media (min-width: 1440px) {
+
+  .create-content {
+    padding: 64px;
+  }
+
+  .create-card {
+    padding: 64px;
+  }
+
+  .create-header h1 {
+    font-size: 34px;
+  }
+}

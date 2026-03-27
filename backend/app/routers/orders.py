@@ -639,6 +639,75 @@ def delete_extra_text(
         "order_id": order.id
     }
 
+@private_router.post("/manual")
+def create_order_manual(
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # ================================
+    # 📥 Validaciones básicas
+    # ================================
+    if not payload.get("nombre"):
+        raise HTTPException(status_code=400, detail="Nombre requerido")
+
+    if not payload.get("fecha"):
+        raise HTTPException(status_code=400, detail="Fecha requerida")
+
+    # ================================
+    # 📊 Valores (todo manual)
+    # ================================
+    subtotal = float(payload.get("subtotal", 0))
+    descuento = float(payload.get("descuento", 0))
+    abonado = float(payload.get("abonado", 0))
+
+    total = subtotal - descuento
+    liquidar = total - abonado
+
+    # ================================
+    # ⏱ Duración (opcional)
+    # ================================
+    duracion = 0.0
+    try:
+        if payload.get("hora_salida") and payload.get("hora_regreso"):
+            t1 = parse_time(payload.get("hora_salida"))
+            t2 = parse_time(payload.get("hora_regreso"))
+            duracion = (t2 - t1).total_seconds() / 3600
+            if duracion < 0:
+                duracion += 24
+    except:
+        pass
+
+    # ================================
+    # 📝 Crear orden (SIN lógica automática)
+    # ================================
+    order = Order(
+        service_id=payload.get("service_id"),  # opcional
+        nombre=payload.get("nombre"),
+        fecha=payload.get("fecha"),
+        dir_salida=payload.get("direccion_salida"),
+        dir_destino=payload.get("destino"),
+        hor_ida=payload.get("hora_salida"),
+        hor_regreso=payload.get("hora_regreso"),
+        duracion=duracion,
+        capacidadu=payload.get("capacidadu"),
+        subtotal=subtotal,
+        descuento=descuento,
+        total=total,
+        abonado=abonado,
+        liquidar=liquidar,
+        texto_extra=payload.get("texto_extra"),
+    )
+
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+
+    return {
+        "status": "ok",
+        "order": serialize_order(order)
+    }
+
 @private_router.get("/{order_id}", response_model=dict)
 def get_order(order_id: int, db: Session = Depends(get_db)):
     order = db.get(Order, order_id)

@@ -125,3 +125,39 @@ export async function deleteExtraText(orderId: number) {
 
   return res.json();
 }
+
+export type CreateOrderManualPayload = {
+  nombre: string;
+  fecha: string;
+  direccion_salida?: string;
+  destino?: string;
+  hora_salida?: string;
+  hora_regreso?: string;
+
+  capacidadu?: number;
+
+  subtotal?: number;
+  descuento?: number;
+  abonado?: number;
+
+  texto_extra?: string;
+  service_id?: number;
+};
+
+export async function createOrderManual(
+  payload: CreateOrderManualPayload,
+  signal?: AbortSignal
+): Promise<Order> {
+  const res = await authFetch(`${API_BASE}/orders/manual`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+    signal,
+  });
+
+  const data = await res.json();
+
+  return data.order as Order;
+}
