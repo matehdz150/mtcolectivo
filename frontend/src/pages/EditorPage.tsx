@@ -137,7 +137,7 @@ export default function OrderEditPage() {
             <div className="header-actions">
               <button
                 className="btn-secondary"
-                onClick={() => navigate("/orders")}
+                onClick={() => navigate("/dashboard")}
               >
                 Cancelar
               </button>
