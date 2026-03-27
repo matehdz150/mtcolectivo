@@ -59,7 +59,7 @@ export default function OrderCreatePage() {
     });
 
     // 👉 redirige al edit (como flujo natural)
-    navigate(`/orders/${result.id}`);
+    navigate(`/dashboard`);
   }
 
   return (
@@ -75,7 +75,7 @@ export default function OrderCreatePage() {
             <div className="header-actions">
               <button
                 className="btn-secondary"
-                onClick={() => navigate("/orders")}
+                onClick={() => navigate("/dashboard")}
               >
                 Cancelar
               </button>

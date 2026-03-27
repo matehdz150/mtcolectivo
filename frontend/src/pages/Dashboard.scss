@@ -173,6 +173,53 @@
 
   /* ================= HEADER ================= */
 
+  /* ============================= */
+/* HEADER TOP */
+/* ============================= */
+
+.orders-pro__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
+
+/* ============================= */
+/* CREATE BUTTON */
+/* ============================= */
+
+.btn-create-order {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  background: #111;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  svg {
+    stroke-width: 2.5;
+  }
+
+  &:hover {
+    background: #000;
+    transform: translateY(-1px);
+  }
+}
+
   h3 {
     margin: 0;
     padding: 1.1rem 1.4rem;
